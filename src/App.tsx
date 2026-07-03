@@ -11,6 +11,7 @@ import AuthManager from "./components/AuthManager";
 import SurgicalCertificate from "./components/SurgicalCertificate";
 import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function App() {
   const [userState, setUserState] = useState<UserState>(loadState());
@@ -353,6 +354,7 @@ export default function App() {
         <p>مدوفیل (Medophil) © {new Date().getFullYear()} - پلتفرم گیمیفاید آموزش جراحی بالینی</p>
         <p className="text-[10px] text-slate-400 mt-1">توسعه یافته توسط مهندس نرم‌افزار ارشد و طراح محصولات آموزشی</p>
       </footer>
+      <Analytics />
     </div>
   );
 }
