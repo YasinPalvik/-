@@ -1,0 +1,6 @@
+{
+  "name": "Medophil",
+  "description": "پلتفرم گیمیفاید آموزش جراحی بالینی بر اساس مبانی جراحی",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
