@@ -6,6 +6,45 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { requireAuth, AuthRequest } from "./src/middleware/auth.ts";
 import { getOrCreateUser, updateUserState, getAllUsersForLeaderboard } from "./src/db/users.ts";
+import { GoogleGenAI } from "@google/genai";
+import { syllabi } from "./src/data/syllabus.ts";
+
+// Helper function to build a comprehensive RAG syllabus context for Gemini
+function getSyllabusContext(): string {
+  let context = "دستورالعمل‌های سیستم (System Instructions):\n";
+  context += "شما جراح مینو (Minoo AI) - دستیار هوشمند و فوق‌تخصص جراحی عمومی مبتنی بر آنتی‌گراویتی هستید. وظیفه شما پاسخ به سوالات علمی، درسی، تشخیصی و کاربردی پزشکان و دانشجویان جراحی عمومی با استناد دقیق به محتوای درسی (Syllabus) زیر است.\n";
+  context += "بسیار مهم: شما باید طوری رفتار کنید که گویی تمام اطلاعات زیر را کاملاً حفظ هستید و با تسلط کامل بر رفرنس‌ها پاسخ می‌دهید.\n";
+  context += "لحن شما باید علمی، دقیق، دلسوزانه، سرشار از انگیزه و تماماً به زبان فارسی باشد. در پاسخ‌های خود از واژگان تخصصی پزشکی (Medical Jargon) با نگارش فارسی و انگلیسی استفاده کنید.\n\n";
+  context += "محتوای علمی و فصل‌های مرجع جراحی عمومی:\n";
+
+  for (const [key, ch] of Object.entries(syllabi)) {
+    context += `\n--- [فصل: ${ch.overview}] ---\n`;
+    context += `شناسه فصل در سیستم: ${ch.chapterId}\n`;
+    
+    context += "مباحث کلیدی فصل:\n";
+    ch.sections.forEach((sec, idx) => {
+      context += `${idx + 1}. ${sec.title}:\n${sec.content}\n\n`;
+    });
+
+    context += "⚠️ تله‌های بالینی بسیار خطرناک (Clinical Pitfalls) - که نادیده گرفتن آنها باعث مرگ حتمی بیمار می‌شود:\n";
+    ch.pitfalls.forEach((pit, idx) => {
+      context += `- تله شماره ${idx + 1}: ${pit.title}\n  توضیح پاتولوژی: ${pit.description}\n  عواقب مرگبار بالینی: ${pit.consequence}\n\n`;
+    });
+
+    context += "💎 مرواریدهای جراحی و نکات طلایی گرانبها (Combined Pearls):\n";
+    ch.combinedPearls.forEach((pearl, idx) => {
+      context += `- ${pearl.title}: ${pearl.content}\n\n`;
+    });
+  }
+
+  context += "\nقوانین پاسخگویی جراح مینو:\n";
+  context += "۱. همیشه پاسخ خود را بر مبنای محتوای علمی بالا قرار دهید. اگر کاربر سؤالی بپرسد که مستقیماً در جزوه است، ارجاع دقیق بدهید (مثلا ذکر نام مبحث یا فصل مربوطه).\n";
+  context += "۲. اگر کاربر سوالی خارج از این ۹ فصل بپرسد، پاسخ او را با دانش پزشکی معتبر بدهید اما با مهربانی یادآور شوید که این سوال فراتر از سرفصل‌های آموزشی فعلی Medophil است و پیشنهاد دهید به سرفصل‌های مرتبط مراجعه کند.\n";
+  context += "۳. برای تله‌های بالینی، دوزهای حساس داروها (مثلا لیدوکائین ساده ۴.۵mg/kg و با اپی‌نفرین ۷mg/kg)، سه‌گانه مرگ تروما (هایپوترمی، اسیدوز، کواگولوپاتی)، دمیلیناسیون پل مغز (CPM) و درمان تامپوناد یا پنوموتوراکس حتماً از آیکون‌های هشدار ⚠️ و استیکرهای جذاب استفاده کنید.\n";
+  context += "۴. به طنز و تعلیق آنتی‌گراویتی (Floating) که به عنوان تم پلتفرم است، اشاره‌های کوچک و جذابی داشته باشید (مثلاً ملق معلق شدن در علم جراحی!).\n";
+
+  return context;
+}
 
 async function startServer() {
   const app = express();
@@ -67,6 +106,56 @@ async function startServer() {
     } catch (error: any) {
       console.error("API post /api/user-state failed:", error);
       res.status(500).json({ error: error.message || "Failed to update user state" });
+    }
+  });
+
+  // Secure RAG-enabled Surgical Chat Endpoint powered by Gemini 3.5 Flash
+  app.post("/api/chat", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ error: "لیست پیام‌ها الزامی است" });
+      }
+
+      const geminiKey = process.env.GEMINI_API_KEY;
+      if (!geminiKey) {
+        return res.status(500).json({ error: "کلید دسترسی به هوش مصنوعی (GEMINI_API_KEY) در سرور پیکربندی نشده است." });
+      }
+
+      // Instantiate GoogleGenAI client (with named parameter as required!)
+      const ai = new GoogleGenAI({
+        apiKey: geminiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
+
+      // Retrieve full RAG contextualized system instruction compiled from the syllabus
+      const systemInstruction = getSyllabusContext();
+
+      // Format messages strictly according to the GoogleGenAI contents schema
+      const formattedContents = messages.map((msg: any) => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content || "" }]
+      }));
+
+      // Generate context-aware response using Gemini 3.5 Flash (for general scientific RAG Q&A)
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: formattedContents,
+        config: {
+          systemInstruction,
+          temperature: 0.7,
+        }
+      });
+
+      const reply = response.text || "متاسفانه جراح مینو قادر به پاسخگویی در این لحظه نبود.";
+      res.json({ reply });
+    } catch (error: any) {
+      console.error("API post /api/chat failed:", error);
+      res.status(500).json({ error: error.message || "خطایی در سیستم جراحی مینو رخ داد." });
     }
   });
 

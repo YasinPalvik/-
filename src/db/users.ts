@@ -20,7 +20,13 @@ export async function getOrCreateUser(uid: string, email: string, fullName?: str
   try {
     const existing = await db.select().from(users).where(eq(users.uid, uid)).limit(1);
     if (existing.length > 0) {
-      return existing[0];
+      const u = existing[0];
+      return {
+        uid: u.uid,
+        email: u.email,
+        fullName: u.fullName,
+        state: typeof u.state === "string" ? JSON.parse(u.state) : u.state || DEFAULT_STATE,
+      };
     }
 
     // Insert new user if not found
@@ -33,7 +39,13 @@ export async function getOrCreateUser(uid: string, email: string, fullName?: str
       })
       .returning();
 
-    return result[0];
+    const u = result[0];
+    return {
+      uid: u.uid,
+      email: u.email,
+      fullName: u.fullName,
+      state: typeof u.state === "string" ? JSON.parse(u.state) : u.state || DEFAULT_STATE,
+    };
   } catch (error) {
     console.error("Database getOrCreateUser failed:", error);
     throw new Error("Failed to load or initialize user account.", { cause: error });
@@ -53,7 +65,13 @@ export async function updateUserState(uid: string, state: any) {
     if (result.length === 0) {
       throw new Error("User not found to update state.");
     }
-    return result[0];
+    const u = result[0];
+    return {
+      uid: u.uid,
+      email: u.email,
+      fullName: u.fullName,
+      state: typeof u.state === "string" ? JSON.parse(u.state) : u.state || DEFAULT_STATE,
+    };
   } catch (error) {
     console.error("Database updateUserState failed:", error);
     throw new Error("Failed to save user progress.", { cause: error });
@@ -70,17 +88,17 @@ export async function getAllUsersForLeaderboard() {
       state: users.state,
     }).from(users);
 
-    return allUsers.map((u, index) => {
+    return allUsers.map((u) => {
       const stateObj = (typeof u.state === "string" ? JSON.parse(u.state) : u.state) as any || {};
       const xp = typeof stateObj.xp === "number" ? stateObj.xp : 0;
       // Get display name: fallback to email prefix if full name is empty
-      const emailPrefix = u.email.split("@")[0] || "کاربر مهمان";
+      const emailPrefix = u.email ? u.email.split("@")[0] : "کاربر مهمان";
       const displayName = u.fullName ? `دکتر ${u.fullName}` : `دکتر ${emailPrefix}`;
       
       return {
         uid: u.uid,
         name: displayName,
-        xp: xp,
+        xp,
       };
     }).sort((a, b) => b.xp - a.xp);
   } catch (error) {
@@ -88,3 +106,4 @@ export async function getAllUsersForLeaderboard() {
     return [];
   }
 }
+

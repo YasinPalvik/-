@@ -12,7 +12,8 @@ import PremiumPortal from "./components/PremiumPortal";
 import AuthManager from "./components/AuthManager";
 import SurgicalCertificate from "./components/SurgicalCertificate";
 import AntigravityCanvas from "./components/AntigravityCanvas";
-import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon } from "lucide-react";
+import MinooChat from "./components/MinooChat";
+import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   // Antigravity dynamic simulation control states
   const [gravityValue, setGravityValue] = useState<number>(0);
@@ -308,6 +310,24 @@ export default function App() {
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">خدمات جراحی</p>
 
                 <button
+                  onClick={() => { setShowChat(true); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all mb-1 ${
+                    showChat
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Bot className="w-4 h-4 text-indigo-400" />
+                    <span>جراح مینو (مشاور علمی RAG)</span>
+                  </div>
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  </span>
+                </button>
+
+                <button
                   onClick={() => { setShowCertificate(true); setIsSidebarOpen(false); }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent transition-all"
                 >
@@ -546,6 +566,35 @@ export default function App() {
           <SurgicalCertificate
             userState={userState}
             onClose={() => setShowCertificate(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* 🌌 Permanent Floating Medical AI Bubble */}
+      {currentView !== "lesson" && currentView !== "result" && !showChat && (
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setShowChat(true)}
+          className="fixed bottom-6 left-6 z-40 w-14 h-14 bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500 rounded-full flex items-center justify-center text-white shadow-[0_0_25px_rgba(99,102,241,0.5)] cursor-pointer group border border-white/10"
+        >
+          <div className="absolute inset-0 rounded-full bg-indigo-500/20 animate-ping group-hover:animate-none opacity-75"></div>
+          <Bot className="w-6 h-6 relative z-10" />
+          <div className="absolute -top-1 -right-1 bg-rose-500 text-[8px] font-extrabold text-white px-1.5 py-0.5 rounded-full shadow-lg border border-slate-900 leading-none">RAG</div>
+        </motion.button>
+      )}
+
+      {/* RAG Chat Overlay */}
+      <AnimatePresence>
+        {showChat && (
+          <MinooChat
+            isOpen={showChat}
+            onClose={() => setShowChat(false)}
+            idToken={idToken}
+            userState={userState}
+            onTriggerAuth={() => setShowAuth(true)}
           />
         )}
       </AnimatePresence>
