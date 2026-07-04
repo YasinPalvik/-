@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { UserState, ViewType } from "./types";
 import { loadState, saveState, updateHeartsByTime, completeConcept, concepts } from "./lib/state";
+import { auth } from "./lib/firebase.ts";
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import Dashboard from "./components/Dashboard";
 import Lesson from "./components/Lesson";
 import Result from "./components/Result";
@@ -24,6 +26,48 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
 
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+  const [idToken, setIdToken] = useState<string | null>(null);
+
+  // Sync auth state and load user state from database
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setCurrentUser(user);
+        try {
+          const token = await user.getIdToken();
+          setIdToken(token);
+          
+          const res = await fetch("/api/user-state", {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setUserState({
+              ...data.state,
+              email: data.email,
+              fullName: data.fullName,
+            });
+            saveState({
+              ...data.state,
+              email: data.email,
+              fullName: data.fullName,
+            });
+          }
+        } catch (e) {
+          console.error("Failed to load user state from Cloud SQL:", e);
+        }
+      } else {
+        setCurrentUser(null);
+        setIdToken(null);
+        setUserState(loadState());
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Background heart regeneration check every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -40,7 +84,7 @@ export default function App() {
   }, []);
 
   // Sync state changes with localStorage & active account DB
-  const handleUpdateState = (newState: UserState) => {
+  const handleUpdateState = async (newState: UserState) => {
     // Premium users get infinite hearts (kept fully charged at 5)
     if (newState.isPremium) {
       newState.hearts = 5;
@@ -49,8 +93,21 @@ export default function App() {
     setUserState(newState);
     saveState(newState);
 
-    // Sync to user list database if authenticated
-    if (newState.email) {
+    // Sync to Cloud SQL if authenticated
+    if (currentUser && idToken) {
+      try {
+        await fetch("/api/user-state", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ state: newState })
+        });
+      } catch (e) {
+        console.error("Failed to sync account progress to server", e);
+      }
+    } else if (newState.email) {
       try {
         const STORAGE_ACCOUNTS_KEY = "medophil_registered_accounts";
         const rawAccounts = localStorage.getItem(STORAGE_ACCOUNTS_KEY);
@@ -67,7 +124,13 @@ export default function App() {
   };
 
   // Logout handler
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+    } catch (e) {
+      console.error("Firebase signOut failed:", e);
+    }
+    
     // Reset to generic default state
     const defaultState: UserState = {
       xp: 0,
