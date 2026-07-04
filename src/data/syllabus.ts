@@ -325,3 +325,8 @@ export const syllabi: Record<string, ChapterSyllabus> = {
     ]
   }
 };
+
+// Import and merge extended syllabi dynamically
+import { extendedSyllabi } from "./content_extended";
+Object.assign(syllabi, extendedSyllabi);
+

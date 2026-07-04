@@ -13,6 +13,15 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
   const [isSaved, setIsSaved] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
+  const activeSubjectId = userState.currentSubject || "surgery";
+  const getSubjectName = (id: string) => {
+    if (id === "cardiology") return "بیماری‌های قلب و عروق";
+    if (id === "pediatrics") return "بیماری‌های کودکان";
+    if (id === "gynecology") return "زنان و زایمان";
+    if (id === "pharmacology") return "داروشناسی بالینی";
+    return "جراحی عمومی";
+  };
+
   // Today's date in Persian format (simple calculation or static clean string)
   const persianDate = "۱۳ تیر ۱۴۰۵";
   const certificateId = "MED-CERT-" + Math.floor(100000 + Math.random() * 900000);
@@ -30,7 +39,7 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
           <div className="space-y-1">
             <h3 className="text-sm font-black text-slate-100 flex items-center gap-1.5">
               <Award className="w-5 h-5 text-amber-400 fill-amber-400" />
-              صدور گواهی‌نامه رسمی شبیه‌سازی جراحی (ویژه کاربران طلایی)
+              صدور گواهی‌نامه رسمی شبیه‌سازی تخصصی {getSubjectName(activeSubjectId)} (ویژه کاربران طلایی)
             </h3>
             <p className="text-[10px] text-slate-400">
               نام خود را برای چاپ بر روی سربرگ گواهی‌نامه تایید و اصلاح کنید.
@@ -98,11 +107,11 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
               {/* Certificate content text */}
               <div className="space-y-4 my-auto pt-4">
                 <h2 className="text-lg font-black text-amber-950 tracking-wide font-sans">
-                  گواهی‌نامه شایستگی شبیه‌سازی بالینی جراحی
+                  گواهی‌نامه شایستگی شبیه‌سازی بالینی {getSubjectName(activeSubjectId)}
                 </h2>
                 
                 <p className="text-[10px] text-slate-400 tracking-wider">
-                  CERTIFICATE OF SURGICAL SIMULATION EXCELLENCE
+                  CERTIFICATE OF CLINICAL SIMULATION EXCELLENCE
                 </p>
 
                 <div className="space-y-4">
@@ -115,7 +124,7 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                   </h3>
 
                   <p className="text-xs text-slate-600 leading-relaxed max-w-lg mx-auto font-sans text-justify">
-                    با طی نمودن موفقیت‌آمیز دوره‌های پیشرفته آموزش بالینی جراحی، شبیه‌سازی سناریوهای بحرانی پرخطر (High-Stakes)، پایش دقیق علائم تشخیصی و کنترل کامل جان‌های بالینی در بیمارستان شبیه‌ساز <strong>مدوفیل</strong>، شایستگی علمی و تصمیم‌گیری چابک خود را در سطح جراحان طراز اول با بالاترین نمره تایید نموده‌اند.
+                    با طی نمودن موفقیت‌آمیز دوره‌های پیشرفته آموزش بالینی {getSubjectName(activeSubjectId)}، شبیه‌سازی سناریوهای بحرانی پرخطر (High-Stakes)، پایش دقیق علائم تشخیصی و کنترل کامل جان‌های بالینی در بیمارستان شبیه‌ساز <strong>مدوفیل</strong>، شایستگی علمی و تصمیم‌گیری چابک خود را در سطح متخصصان طراز اول با بالاترین نمره تایید نموده‌اند.
                   </p>
                 </div>
               </div>
@@ -125,7 +134,7 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                 
                 {/* Sign 1 */}
                 <div className="text-center space-y-1">
-                  <span className="text-[8px] text-slate-400 block">دبیر شورای آموزش جراحی</span>
+                  <span className="text-[8px] text-slate-400 block">دبیر شورای آموزش {getSubjectName(activeSubjectId)}</span>
                   <div className="w-20 h-6 border-b border-amber-800/20 border-dotted mx-auto flex items-center justify-center">
                     <span className="text-[9px] text-sky-600 font-serif italic">دکتر سهرابی</span>
                   </div>

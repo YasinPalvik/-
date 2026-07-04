@@ -67,6 +67,7 @@ export default function Lesson({ chapterId, isReview, userState, onLessonComplet
   const [currentStage, setCurrentStage] = useState<"syllabus" | "quiz">(isReview ? "quiz" : "syllabus");
   const [syllabusTab, setSyllabusTab] = useState<"overview" | "content" | "pitfalls" | "pearls">("overview");
   const [activeSectionIdx, setActiveSectionIdx] = useState(0);
+  const [syllabusPage, setSyllabusPage] = useState(0);
 
   // Trigger sound feedback using the browser Web Audio API
   const playSound = (type: "correct" | "wrong" | "complete") => {
@@ -331,304 +332,332 @@ export default function Lesson({ chapterId, isReview, userState, onLessonComplet
   if (currentStage === "syllabus") {
     const syllabus = syllabi[chapterId] || syllabi["ch1"];
     const currentChapter = chapters.find(c => c.id === chapterId);
+    const sectionsCount = syllabus.sections.length;
+    
+    // Page allocation:
+    // Page 0: Overview & Goals
+    // Page 1 to sectionsCount: Detailed Sections
+    // Page sectionsCount + 1: Clinical Pitfalls
+    // Page sectionsCount + 2: Surgical Pearls
+    // Page sectionsCount + 3: Finished / Ready to start quiz
+    const totalSyllabusPages = 1 + sectionsCount + 1 + 1 + 1;
+
+    const handleNextPage = () => {
+      if (syllabusPage < totalSyllabusPages - 1) {
+        setSyllabusPage(prev => prev + 1);
+      } else {
+        setCurrentStage("quiz");
+      }
+    };
+
+    const handlePrevPage = () => {
+      if (syllabusPage > 0) {
+        setSyllabusPage(prev => prev - 1);
+      }
+    };
+
     return (
       <div className="max-w-3xl mx-auto space-y-6 relative z-10" dir="rtl" id="syllabus-container">
         {/* Top Header Controls for Syllabus */}
         <div className="flex items-center justify-between gap-4">
           <button
             onClick={onLessonExit}
-            className="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-white/40 transition-all shrink-0"
+            className="text-slate-400 hover:text-slate-200 p-2 rounded-xl hover:bg-white/5 transition-all shrink-0 flex items-center gap-1 text-xs font-bold"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5 rotate-180" />
+            <span>خروج</span>
           </button>
           
           <div className="flex-1 text-center">
-            <span className="text-[10px] bg-blue-100 text-blue-700 font-extrabold px-3 py-1 rounded-full border border-blue-200">
-              📚 فاز اول: درسنامه تخصصی و مفهومی جراحی
+            <span className="text-[10px] bg-indigo-500/10 text-indigo-300 font-extrabold px-3 py-1.5 rounded-full border border-indigo-500/25">
+              🎓 برنامه‌ریز درسی: بخش‌های درسنامه جراحی
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentStage("quiz")}
-              className="text-xs font-black text-white bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl transition-all"
+              className="text-xs font-black text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl transition-all shadow-md shadow-indigo-500/10"
             >
               شروع مستقیم کوییز ◀
             </button>
           </div>
         </div>
 
-        {/* Hero Banner for Chapter */}
-        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 rounded-[32px] p-8 text-white shadow-xl relative overflow-hidden">
-          <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-          <div className="absolute top-4 left-4 text-white/10">
+        {/* Dynamic Chapter Theme Banner */}
+        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 border border-white/10 rounded-[32px] p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute right-0 bottom-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+          <div className="absolute top-4 left-4 text-white/[0.03]">
             <BookOpen className="w-32 h-32" />
           </div>
-          <div className="space-y-3 relative z-10">
+          <div className="space-y-3 relative z-10 text-right">
             <div className="flex items-center gap-2">
-              <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
-                فصل جاری در کلاس درس
+              <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider">
+                کلاس درس جراحی مدوفیل
+              </span>
+              <span className="bg-slate-900 border border-white/5 text-slate-400 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold">
+                صفحه {syllabusPage + 1} از {totalSyllabusPages}
               </span>
             </div>
-            <h1 className="text-2xl font-black">{currentChapter?.title || "درسنامه جراحی بالینی"}</h1>
-            <p className="text-xs text-blue-100/90 max-w-xl leading-relaxed">
+            <h1 className="text-xl md:text-2xl font-black">{currentChapter?.title || "درسنامه جراحی بالینی"}</h1>
+            <p className="text-xs text-slate-300 leading-relaxed max-w-2xl font-sans">
               {syllabus.overview}
             </p>
           </div>
         </div>
 
-        {/* Main Interactive Syllabus Card */}
-        <div className="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-[32px] shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[480px]">
-          {/* Sidebar Tabs */}
-          <div className="w-full md:w-64 border-l border-slate-200/60 bg-slate-50/50 p-6 flex flex-col gap-2.5">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">سرفصل‌های آموزشی</span>
-            
-            <button
-              onClick={() => setSyllabusTab("overview")}
-              className={`w-full text-right px-4 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 ${
-                syllabusTab === "overview"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
-                  : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/40"
-              }`}
-            >
-              <Activity className="w-4 h-4" />
-              <span>۱. نمای کلی و اهداف</span>
-            </button>
+        {/* Main Paginated Syllabus Card */}
+        <div className="bg-slate-900/40 border border-white/[0.06] backdrop-blur-xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col min-h-[500px]">
+          
+          {/* Top Multi-Page Stepper Timeline */}
+          <div className="border-b border-white/5 bg-slate-950/40 px-6 py-4">
+            <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2 scrollbar-none">
+              {[...Array(totalSyllabusPages)].map((_, idx) => {
+                const isActive = syllabusPage === idx;
+                const isCompleted = syllabusPage > idx;
+                
+                let label = "";
+                if (idx === 0) label = "نمای کلی";
+                else if (idx <= sectionsCount) label = `بخش ${idx}`;
+                else if (idx === sectionsCount + 1) label = "دام‌های بالینی";
+                else if (idx === sectionsCount + 2) label = "نکات طلایی";
+                else label = "اتمام و شروع";
 
-            <button
-              onClick={() => {
-                setSyllabusTab("content");
-                setActiveSectionIdx(0);
-              }}
-              className={`w-full text-right px-4 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 ${
-                syllabusTab === "content"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
-                  : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/40"
-              }`}
-            >
-              <Stethoscope className="w-4 h-4" />
-              <span>۲. درسنامه تفصیلی مفهومی</span>
-            </button>
-
-            <button
-              onClick={() => setSyllabusTab("pitfalls")}
-              className={`w-full text-right px-4 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 ${
-                syllabusTab === "pitfalls"
-                  ? "bg-rose-600 text-white shadow-md shadow-rose-500/10"
-                  : "bg-white hover:bg-rose-50/50 text-rose-700 border border-rose-200/40"
-              }`}
-            >
-              <Skull className="w-4 h-4" />
-              <span>۳. دام‌های پرتکرار بالینی</span>
-            </button>
-
-            <button
-              onClick={() => setSyllabusTab("pearls")}
-              className={`w-full text-right px-4 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 ${
-                syllabusTab === "pearls"
-                  ? "bg-amber-500 text-white shadow-md shadow-amber-500/10"
-                  : "bg-white hover:bg-amber-50/50 text-amber-700 border border-amber-200/40"
-              }`}
-            >
-              <Award className="w-4 h-4" />
-              <span>۴. نکات ترکیبی جراحی</span>
-            </button>
-
-            <div className="mt-auto pt-6 text-center text-[10px] text-slate-400 font-bold border-t border-slate-200/50">
-              مطالعه عمیق درسنامه پیش‌نیاز ورود به آزمون است.
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setSyllabusPage(idx)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-black transition-all shrink-0 border ${
+                      isActive
+                        ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-500/15 scale-105"
+                        : isCompleted
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25"
+                        : "bg-slate-900/40 text-slate-500 border-white/[0.02] hover:text-slate-300 hover:border-white/10"
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black font-sans ${
+                      isActive 
+                        ? "bg-white text-indigo-900" 
+                        : isCompleted 
+                        ? "bg-emerald-500 text-slate-950" 
+                        : "bg-slate-800 text-slate-400"
+                    }`}>
+                      {isCompleted ? "✓" : idx + 1}
+                    </div>
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Tab Content Display Area */}
+          {/* Current Page Content Display Area */}
           <div className="flex-1 p-6 md:p-8 flex flex-col justify-between">
             <div className="space-y-6">
               <AnimatePresence mode="wait">
-                {syllabusTab === "overview" && (
-                  <motion.div
-                    key="tab-overview"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-5"
-                  >
-                    <div className="space-y-1">
-                      <h3 className="text-base font-black text-slate-800">۱. اهداف یادگیری و نمای کلی</h3>
-                      <p className="text-xs text-slate-400">در این بخش چه مفاهیمی را یاد خواهید گرفت؟</p>
-                    </div>
+                <motion.div
+                  key={`syllabus-page-${syllabusPage}`}
+                  initial={{ opacity: 0, x: -15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 15 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-6"
+                >
+                  {/* Render Page 0: Overview & Goals */}
+                  {syllabusPage === 0 && (
+                    <div className="space-y-5 text-right">
+                      <div className="space-y-1">
+                        <span className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-[9px] font-black px-2.5 py-1 rounded-md">۱. اهداف یادگیری و دورنمای تحصیلی</span>
+                        <h3 className="text-base font-black text-white pt-2">نقشه راه و اهداف تحصیلی فصل جراحی</h3>
+                        <p className="text-[11px] text-slate-400 font-sans">به عنوان پزشک معالج، پیش از ورود به کوییز باید به این سرفصل‌ها تسلط یابید:</p>
+                      </div>
 
-                    <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl leading-relaxed text-xs text-slate-600 space-y-4">
-                      <p className="font-medium text-slate-700">
-                        به عنوان یک پزشک جراح یا دانشجوی پزشکی هوشمند، تسلط بر اصول فیزیولوژیک این بخش، ابزار بقای شما در مواجهه با بیماران اورژانسی یا بستری در بخش است.
-                      </p>
-                      <div className="space-y-2">
-                        <span className="block font-bold text-slate-800">سرخط‌های کلیدی درسنامه:</span>
-                        <ul className="list-disc list-inside space-y-1.5 pl-2">
+                      <div className="bg-slate-950/60 border border-white/[0.04] p-5 rounded-2xl leading-relaxed text-xs text-slate-300 space-y-4 font-sans">
+                        <p className="font-semibold text-slate-200">
+                          تسلط بر اصول فیزیولوژیک این بخش، ابزار بقای شما در مواجهه با بیماران اورژانسی یا بستری در بخش است. در ادامه بخش‌های این درسنامه آورده شده است:
+                        </p>
+                        <div className="space-y-3 pt-2">
                           {syllabus.sections.map((sec, idx) => (
-                            <li key={idx} className="text-slate-600">
-                              <strong className="text-blue-600">{sec.title}</strong>: تبیین مبانی و کاربرد بالینی.
-                            </li>
+                            <div key={idx} className="flex items-start gap-2.5 bg-slate-900/40 p-3 rounded-xl border border-white/[0.02]">
+                              <span className="w-5 h-5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-full flex items-center justify-center text-[9px] font-mono shrink-0">
+                                {idx + 1}
+                              </span>
+                              <div>
+                                <strong className="text-indigo-300 text-xs">{sec.title}</strong>
+                                <p className="text-[10px] text-slate-400 mt-1">بررسی فیزیولوژی، تشخیص بالینی و درمان انتخابی مبحث</p>
+                              </div>
+                            </div>
                           ))}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-2xl text-right">
+                        <Lightbulb className="w-5 h-5 text-indigo-400 shrink-0" />
+                        <p className="text-[10px] text-slate-300 leading-relaxed font-sans">
+                          <strong>توصیه جراح ارشد:</strong> درسنامه به گونه‌ای طراحی شده تا سناریوهای بالینی واقعی را به چالش بکشد. با مطالعه دقیق ورق بزنید و برای امتحان کوییز آماده شوید.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Render Page 1 to sectionsCount: Detailed Sections */}
+                  {syllabusPage > 0 && syllabusPage <= sectionsCount && (() => {
+                    const secIndex = syllabusPage - 1;
+                    const activeSec = syllabus.sections[secIndex];
+                    return (
+                      <div className="space-y-5 text-right">
+                        <div className="space-y-1">
+                          <span className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-[9px] font-black px-2.5 py-1 rounded-md">
+                            بخش {syllabusPage} از {sectionsCount}: مفاهیم پایه
+                          </span>
+                          <h3 className="text-base font-black text-white pt-2 flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                            {activeSec?.title}
+                          </h3>
+                          <p className="text-[11px] text-slate-400 font-sans">توضیحات و درسنامه تشخیصی عمیق جراحی</p>
+                        </div>
+
+                        <div className="bg-slate-950/60 border border-white/[0.04] p-5 rounded-2xl leading-relaxed text-xs text-slate-300 whitespace-pre-line font-sans shadow-inner max-h-[290px] overflow-y-auto">
+                          {activeSec?.content}
+                        </div>
+
+                        <div className="bg-slate-900/60 p-3.5 rounded-xl border border-white/5 text-[10px] text-slate-400 font-sans flex justify-between items-center">
+                          <span>پیشرفت مبانی درسنامه</span>
+                          <span className="font-mono">{Math.round((syllabusPage / sectionsCount) * 100)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Render Page sectionsCount + 1: Clinical Pitfalls */}
+                  {syllabusPage === sectionsCount + 1 && (
+                    <div className="space-y-5 text-right">
+                      <div className="space-y-1">
+                        <span className="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[9px] font-black px-2.5 py-1 rounded-md">دام‌های بحرانی بخش جراحی</span>
+                        <h3 className="text-base font-black text-rose-400 pt-2 flex items-center gap-2">
+                          <Skull className="w-5 h-5 text-rose-500" />
+                          دام‌های پرتکرار و سناریوهای فاجعه‌آفرین بالینی
+                        </h3>
+                        <p className="text-[11px] text-slate-400 font-sans">اشتباهاتی که یک جراح هرگز نباید در بالین مرتکب شود:</p>
+                      </div>
+
+                      <div className="space-y-4 max-h-[290px] overflow-y-auto pr-1">
+                        {syllabus.pitfalls.map((pit, idx) => (
+                          <div key={idx} className="bg-rose-500/5 border border-rose-500/10 rounded-2xl p-4 space-y-2.5 text-right">
+                            <h4 className="text-xs font-black text-rose-300 flex items-center gap-2">
+                              <span className="w-5 h-5 bg-rose-500/10 border border-rose-500/25 text-rose-300 rounded-full flex items-center justify-center text-[10px] font-black">{idx + 1}</span>
+                              {pit.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
+                              {pit.description}
+                            </p>
+                            <div className="bg-rose-950/60 text-rose-200 p-3 rounded-xl border border-rose-500/20 text-[10px] leading-relaxed flex gap-2 font-sans">
+                              <span className="font-extrabold text-rose-400 shrink-0">💀 پیامد بالینی واقعی:</span>
+                              <p>{pit.consequence}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Render Page sectionsCount + 2: Surgical Pearls */}
+                  {syllabusPage === sectionsCount + 2 && (
+                    <div className="space-y-5 text-right">
+                      <div className="space-y-1">
+                        <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-black px-2.5 py-1 rounded-md">مرواریدهای جراحی (Surgical Pearls)</span>
+                        <h3 className="text-base font-black text-amber-400 pt-2 flex items-center gap-2">
+                          <Award className="w-5 h-5 text-amber-400 fill-amber-400/10" />
+                          نکات ترکیبی و مرواریدهای جراحی بالینی
+                        </h3>
+                        <p className="text-[11px] text-slate-400 font-sans">ارتباطات همگرا بین داروشناسی، جراحی و پاتولوژی:</p>
+                      </div>
+
+                      <div className="space-y-3.5 max-h-[290px] overflow-y-auto pr-1">
+                        {syllabus.combinedPearls.map((pearl, idx) => (
+                          <div key={idx} className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 space-y-2 text-right">
+                            <h4 className="text-xs font-black text-amber-300 flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-amber-400" />
+                              {pearl.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
+                              {pearl.content}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Render Page sectionsCount + 3: Ready Screen */}
+                  {syllabusPage === sectionsCount + 3 && (
+                    <div className="space-y-6 text-center py-6">
+                      <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-400 mb-2">
+                        <Check className="w-8 h-8 stroke-[3]" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <h3 className="text-base font-black text-white">تبریک! تمام صفحات درسنامه را مطالعه کردید 🎓</h3>
+                        <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed font-sans">
+                          شما با موفقیت فرآیند سگمنت‌بندی شده و فازهای درسنامه جراحی را ورق زدید و هم‌اکنون آماده شروع سناریوهای کوییز بالینی هستید.
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-950 p-4 rounded-2xl border border-white/[0.04] text-right space-y-3 max-w-md mx-auto">
+                        <h4 className="text-xs font-black text-indigo-300">خلاصه آمادگی شما:</h4>
+                        <ul className="text-[11px] text-slate-400 space-y-2 list-none font-sans">
+                          <li className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                            <span>مطالعه عمیق <strong>{sectionsCount} بخش</strong> علمی درسنامه جراحی</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                            <span>بررسی تله‌های امتحانی و <strong>پیشگیری از اشتباهات مرگبار</strong></span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            <span>ارتباط کانسپت‌ها و نکات همگرای مروارید جراحی</span>
+                          </li>
                         </ul>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 bg-blue-50/50 border border-blue-100 p-4 rounded-2xl">
-                      <Lightbulb className="w-5 h-5 text-blue-500 shrink-0" />
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                        <strong>توصیه جراح ارشد:</strong> ابتدا سرفصل‌های مفهومی را مرور کنید، سپس به بخش دام‌های پرتکرار سر بزنید تا در سوالات کوییز دچار اشتباه بالینی نشوید.
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-
-                {syllabusTab === "content" && (
-                  <motion.div
-                    key="tab-content"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-5"
-                  >
-                    {/* Section Selector Pills */}
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                      {syllabus.sections.map((sec, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setActiveSectionIdx(idx)}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-black shrink-0 transition-all ${
-                            activeSectionIdx === idx
-                              ? "bg-blue-100 text-blue-700 border border-blue-300"
-                              : "bg-slate-100 text-slate-500 hover:bg-slate-200 border border-transparent"
-                          }`}
-                        >
-                          {sec.title}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Section Details */}
-                    <div className="space-y-3">
-                      <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                        {syllabus.sections[activeSectionIdx]?.title}
-                      </h3>
-                      <div className="bg-slate-50/60 border border-slate-200 p-5 rounded-2xl leading-relaxed text-xs text-slate-600 whitespace-pre-line font-sans shadow-2xs">
-                        {syllabus.sections[activeSectionIdx]?.content}
-                      </div>
-                    </div>
-
-                    {/* Quick navigation within sections */}
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-[10px] text-slate-400 font-bold">بخش {activeSectionIdx + 1} از {syllabus.sections.length}</span>
-                      {activeSectionIdx < syllabus.sections.length - 1 ? (
-                        <button
-                          onClick={() => setActiveSectionIdx(prev => prev + 1)}
-                          className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                        >
-                          <span>بخش بعدی درسنامه</span>
-                          <ChevronLeft className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setSyllabusTab("pitfalls")}
-                          className="text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1"
-                        >
-                          <span>ورود به دام‌های پرتکرار جراحی ◀</span>
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-
-                {syllabusTab === "pitfalls" && (
-                  <motion.div
-                    key="tab-pitfalls"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-4"
-                  >
-                    <div className="space-y-1">
-                      <h3 className="text-base font-black text-rose-800 flex items-center gap-2">
-                        <Skull className="w-5 h-5 text-rose-600" />
-                        <span>دام‌های پرتکرار و سناریوهای فاجعه‌آفرین بالینی</span>
-                      </h3>
-                      <p className="text-xs text-rose-600 font-medium">اشتباهاتی که یک جراح هرگز نباید مرتکب شود:</p>
-                    </div>
-
-                    <div className="space-y-4 max-h-[280px] overflow-y-auto pr-1">
-                      {syllabus.pitfalls.map((pit, idx) => (
-                        <div key={idx} className="bg-rose-50/40 border border-rose-200 rounded-2xl p-4 space-y-2 text-right">
-                          <h4 className="text-xs font-black text-rose-800 flex items-center gap-2">
-                            <span className="w-5 h-5 bg-rose-505 text-white rounded-full flex items-center justify-center text-[10px] font-black">{idx + 1}</span>
-                            {pit.title}
-                          </h4>
-                          <p className="text-[11px] text-slate-600 leading-relaxed pl-7">
-                            {pit.description}
-                          </p>
-                          <div className="bg-rose-950 text-white p-3 rounded-xl border border-rose-800 text-[10px] leading-relaxed flex gap-2">
-                            <span className="font-extrabold text-rose-300 shrink-0">💀 پیامد واقعی:</span>
-                            <p>{pit.consequence}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="text-left">
-                      <button
-                        onClick={() => setSyllabusTab("pearls")}
-                        className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 mr-auto"
-                      >
-                        <span>مطالعه نکات ترکیبی و طلایی</span>
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {syllabusTab === "pearls" && (
-                  <motion.div
-                    key="tab-pearls"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-4"
-                  >
-                    <div className="space-y-1">
-                      <h3 className="text-base font-black text-amber-700 flex items-center gap-2">
-                        <Award className="w-5 h-5 text-amber-500 fill-amber-500/10" />
-                        <span>نکات ترکیبی و مرواریدهای جراحی (Surgical Pearls)</span>
-                      </h3>
-                      <p className="text-xs text-amber-600 font-medium">ارتباط همگرا بین جراحی، داروشناسی و پاتولوژی:</p>
-                    </div>
-
-                    <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
-                      {syllabus.combinedPearls.map((pearl, idx) => (
-                        <div key={idx} className="bg-amber-50/40 border border-amber-200 rounded-2xl p-4 space-y-2">
-                          <h4 className="text-xs font-black text-amber-800 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-amber-500" />
-                            {pearl.title}
-                          </h4>
-                          <p className="text-[11px] text-slate-700 leading-relaxed">
-                            {pearl.content}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
+                  )}
+                </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* Syllabus Footer Actions */}
-            <div className="pt-6 border-t border-slate-200/50 flex gap-4 mt-6">
+            {/* Bottom Multi-Page Navigation Controls */}
+            <div className="pt-6 border-t border-white/5 flex items-center justify-between mt-6 gap-4">
               <button
-                onClick={() => setCurrentStage("quiz")}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs py-4 rounded-2xl border-b-4 border-indigo-800 active:border-b-0 active:translate-y-[4px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/15"
+                onClick={handlePrevPage}
+                disabled={syllabusPage === 0}
+                className="bg-slate-900/60 hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900/60 text-slate-300 border border-white/10 text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-2 transition-all shrink-0"
               >
-                <span>ورود به شبیه‌ساز جراحی بالینی (شروع آزمون)</span>
-                <ChevronLeft className="w-4.5 h-4.5" />
+                <ChevronRight className="w-4 h-4 text-slate-300" />
+                <span>صفحه قبل</span>
               </button>
+
+              <div className="text-[10px] text-slate-500 font-mono font-bold hidden sm:block">
+                ورق‌زدن درسنامه جراحی • صفحه {syllabusPage + 1} از {totalSyllabusPages}
+              </div>
+
+              {syllabusPage === totalSyllabusPages - 1 ? (
+                <button
+                  onClick={() => setCurrentStage("quiz")}
+                  className="bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs py-2.5 px-6 rounded-xl shadow-lg transition-all flex items-center gap-1.5 animate-pulse"
+                >
+                  <span>ورود به شبیه‌ساز بالینی</span>
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleNextPage}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs py-2.5 px-6 rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+                >
+                  <span>صفحه بعد</span>
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>

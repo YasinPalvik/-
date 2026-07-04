@@ -22,11 +22,16 @@ import {
   TrendingUp,
   Award as AwardIcon,
   Check,
-  X
+  X,
+  Stethoscope,
+  Activity,
+  Compass,
+  GraduationCap
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import KnowledgeMap from "./KnowledgeMap";
 import Tilt3D from "./Tilt3D";
+import { subjectsList } from "../data/subjects";
 
 // Premium 3D Rendered assets from Microsoft Fluent UI Emoji (completely free & open-source)
 const chapter3DAssets = [
@@ -47,6 +52,7 @@ interface DashboardProps {
   onStartLesson: (chapterId: string, isReview: boolean) => void;
   onNavigateTo: (view: "profile" | "settings") => void;
   onTriggerPremium: () => void;
+  onUpdateState?: (state: UserState) => void;
   
   // Antigravity dynamic simulation control states passed from App.tsx
   gravityValue: number;
@@ -159,6 +165,7 @@ export default function Dashboard({
   onStartLesson, 
   onNavigateTo, 
   onTriggerPremium,
+  onUpdateState,
   gravityValue,
   setGravityValue,
   speedFactor,
@@ -192,19 +199,49 @@ export default function Dashboard({
     };
   }, [userState.xp]);
 
+  const activeSubjectId = userState.currentSubject || "surgery";
+
+  const handleSelectSubject = (subjId: string, accentColor: string) => {
+    if (onUpdateState) {
+      onUpdateState({
+        ...userState,
+        currentSubject: subjId
+      });
+    }
+    const themeMap: Record<string, "indigo" | "cyan" | "rose" | "emerald" | "amber"> = {
+      surgery: "indigo",
+      cardiology: "rose",
+      pediatrics: "cyan",
+      gynecology: "cyan",
+      pharmacology: "emerald"
+    };
+    setThemeColor(themeMap[subjId] || "indigo");
+  };
+
+  const getSubjectForChapter = (chapterId: string): string => {
+    if (chapterId.startsWith("cardio_")) return "cardiology";
+    if (chapterId.startsWith("pedi_")) return "pediatrics";
+    if (chapterId.startsWith("gyn_")) return "gynecology";
+    if (chapterId.startsWith("pharma_")) return "pharmacology";
+    return "surgery";
+  };
+
+  const activeChapters = chapters.filter(ch => getSubjectForChapter(ch.id) === activeSubjectId);
+  const activeConcepts = concepts.filter(c => getSubjectForChapter(c.chapterId) === activeSubjectId);
+
   const isChapterUnlocked = (chapterId: string, idx: number) => {
     if (idx === 0) return true;
     return userState.unlockedChapters.includes(chapterId);
   };
 
-  const completedConceptsCount = userState.completedConcepts.length;
-  const totalConceptsCount = concepts.length;
+  const completedConceptsCount = activeConcepts.filter(c => userState.completedConcepts.includes(c.id)).length;
+  const totalConceptsCount = activeConcepts.length;
 
   const isConceptUnlocked = (conceptId: string) => {
-    const concept = concepts.find(c => c.id === conceptId);
+    const concept = activeConcepts.find(c => c.id === conceptId);
     if (!concept) return false;
     
-    const chapterIdx = chapters.findIndex(ch => ch.id === concept.chapterId);
+    const chapterIdx = activeChapters.findIndex(ch => ch.id === concept.chapterId);
     if (!isChapterUnlocked(concept.chapterId, chapterIdx)) return false;
 
     return concept.prerequisites.every((pid) =>
@@ -248,7 +285,7 @@ export default function Dashboard({
   return (
     <div className="space-y-8" dir="rtl">
       
-      {/* Medophil Headquarter & Surgical Department Banner */}
+      {/* Medophil Headquarter & Medical Specialty Learning Hub Banner */}
       <div className="bg-gradient-to-r from-indigo-950/80 via-slate-900/60 to-purple-950/80 border border-white/10 p-6 rounded-[32px] relative overflow-hidden shadow-2xl">
         <div className="absolute right-0 top-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-[80px]" />
         <div className="absolute left-10 top-1/2 -translate-y-1/2 w-28 h-28 hidden md:block select-none pointer-events-none">
@@ -273,17 +310,109 @@ export default function Dashboard({
           <div className="flex-1 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="bg-indigo-500 text-white font-black text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
-                🎓 آکادمی شبیه‌سازی جراحی
+                🎓 آکادمی جامع شبیه‌سازی بالینی مدوفیل
               </span>
-              <span className="text-[10px] text-indigo-300 font-extrabold font-mono">مدوفیل (دستیار تخصصی جراحی)</span>
+              <span className="text-[10px] text-indigo-300 font-extrabold font-mono">هاب یکپارچه یادگیری دروس پزشکی</span>
             </div>
             <h2 className="text-xl font-black text-white leading-snug">
-              خوش آمدید، همکار بالینی! به مقر شبیه‌سازی جراحی مدوفیل خوش آمدید 🩺
+              خوش آمدید، همکار بالینی! به هاب جامع یادگیری و شبیه‌سازی پزشکی مدوفیل خوش آمدید 🩺
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-              با تمرین‌های شبیه‌سازی بالینی و متد تکرار فاصله‌دار، مهارت جراحی خودت رو ارتقا بده و تصمیم‌گیری بالینی دقیق رو در محیطی تعاملی و جذاب تمرین کن!
+              با تمرین‌های شبیه‌سازی بالینی پیشرفته و متد تکرار فاصله‌دار، مهارت‌های پزشکی خود را در دپارتمان‌های مختلف ارتقا داده و تصمیم‌گیری بالینی چابک را در محیطی تعاملی تمرین کنید!
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* 🧬 Scalable Medical Subjects Selector (Interactive Hub Mode) */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="text-right">
+            <h3 className="text-xs font-black text-white flex items-center gap-2">
+              <Compass className="w-4.5 h-4.5 text-indigo-400" />
+              انتخاب دپارتمان و درس تخصصی هدف
+            </h3>
+            <p className="text-[10px] text-slate-400">یک شاخه تخصصی را برگزینید تا درخت یادگیری و سرفصل‌های همان دپارتمان نمایش داده شود.</p>
+          </div>
+          <span className="text-[9px] bg-slate-900 border border-indigo-500/10 text-indigo-300 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+            <GraduationCap className="w-3.5 h-3.5 text-indigo-400" />
+            ۵ دپارتمان فعال علمی
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          {subjectsList.map((subject) => {
+            const isActive = subject.id === activeSubjectId;
+            const subjectChapters = chapters.filter(ch => getSubjectForChapter(ch.id) === subject.id);
+            const subjectConcepts = concepts.filter(c => getSubjectForChapter(c.chapterId) === subject.id);
+            const completedCount = subjectConcepts.filter(c => userState.completedConcepts.includes(c.id)).length;
+            const totalCount = subjectConcepts.length;
+            const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+            const IconComponent = () => {
+              if (subject.icon === "Heart") return <Heart className={`w-4 h-4 ${isActive ? "text-white" : "text-rose-400 group-hover:scale-110 transition-transform"}`} />;
+              if (subject.icon === "Activity") return <Activity className={`w-4 h-4 ${isActive ? "text-white" : "text-cyan-400 group-hover:scale-110 transition-transform"}`} />;
+              if (subject.icon === "Sparkles") return <Sparkles className={`w-4 h-4 ${isActive ? "text-white" : "text-purple-400 group-hover:scale-110 transition-transform"}`} />;
+              if (subject.icon === "Award") return <Award className={`w-4 h-4 ${isActive ? "text-white" : "text-emerald-400 group-hover:scale-110 transition-transform"}`} />;
+              return <Stethoscope className={`w-4 h-4 ${isActive ? "text-white" : "text-indigo-400 group-hover:scale-110 transition-transform"}`} />;
+            };
+
+            const accentBorder = {
+              surgery: "hover:border-indigo-500/30",
+              cardiology: "hover:border-rose-500/30",
+              pediatrics: "hover:border-cyan-500/30",
+              gynecology: "hover:border-purple-500/30",
+              pharmacology: "hover:border-emerald-500/30"
+            }[subject.id as string] || "hover:border-indigo-500/30";
+
+            return (
+              <button
+                key={subject.id}
+                onClick={() => handleSelectSubject(subject.id, subject.accentColor)}
+                className={`p-3.5 rounded-2xl border text-right transition-all relative overflow-hidden group select-none ${
+                  isActive
+                    ? "bg-slate-900 border-indigo-500/40 shadow-lg text-white ring-1 ring-indigo-500/20"
+                    : "bg-slate-900/30 border-white/[0.05] text-slate-300 hover:bg-slate-900/50 hover:text-white"
+                } ${accentBorder}`}
+              >
+                {isActive && (
+                  <div className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500" />
+                )}
+
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
+                    isActive 
+                      ? "bg-indigo-600/30 border border-indigo-400/30" 
+                      : "bg-slate-950/80 border border-white/5"
+                  }`}>
+                    <IconComponent />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-[11px] font-black leading-tight truncate">{subject.title}</h4>
+                    <span className="text-[7px] font-bold text-slate-500 block uppercase font-mono tracking-wider truncate">{subject.englishTitle}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1 relative z-10">
+                  <div className="flex justify-between text-[7px] text-slate-400 font-extrabold font-mono">
+                    <span>پیشرفت: {progressPct}%</span>
+                    <span>{completedCount}/{totalCount} گره</span>
+                  </div>
+                  <div className="w-full h-1 bg-slate-950/60 rounded-full overflow-hidden border border-white/5">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        subject.id === "surgery" ? "bg-indigo-500" :
+                        subject.id === "cardiology" ? "bg-rose-500" :
+                        subject.id === "pediatrics" ? "bg-cyan-500" :
+                        subject.id === "gynecology" ? "bg-purple-500" : "bg-emerald-500"
+                      }`}
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
       
@@ -525,10 +654,10 @@ export default function Dashboard({
             <div className="text-right">
               <h2 className="text-base font-black text-white flex items-center gap-2">
                 <BookMarked className="w-5 h-5 text-indigo-400" />
-                نقشه مطالعاتی و مسیر جراحی بالینی
+                نقشه مطالعاتی و مسیر یادگیری {subjectsList.find(s => s.id === activeSubjectId)?.title || "تخصصی"}
               </h2>
               <p className="text-[11px] text-slate-400 font-medium">
-                برای باز کردن و دسترسی به مفاهیم تعاملی جراحی، روی گره‌های دایره‌ای کلیک کنید.
+                برای باز کردن و دسترسی به مفاهیم تعاملی، روی گره‌های دایره‌ای کلیک کنید.
               </p>
             </div>
 
@@ -539,11 +668,11 @@ export default function Dashboard({
 
           {/* Interactive Serpentine Unit Roadmap */}
           <div className="space-y-12">
-            {chapters.map((chapter, index) => {
+            {activeChapters.map((chapter, index) => {
               const unlocked = isChapterUnlocked(chapter.id, index);
               const progress = userState.chapterProgress[chapter.id] || 0;
               const theme = chapterThemes[index % chapterThemes.length];
-              const chConcepts = concepts.filter(c => c.chapterId === chapter.id);
+              const chConcepts = activeConcepts.filter(c => c.chapterId === chapter.id);
 
               return (
                 <div key={chapter.id} className={`relative space-y-6 ${!unlocked && "opacity-40 select-none"}`}>
@@ -666,7 +795,7 @@ export default function Dashboard({
                   {!unlocked && (
                     <div className="py-6 text-center bg-slate-950/20 rounded-xl border border-dashed border-white/5 text-slate-500 flex flex-col items-center justify-center gap-1">
                       <Lock className="w-5 h-5 text-slate-600" />
-                      <p className="text-[11px] font-extrabold">بخش جراحی بالینی مربوطه قفل است</p>
+                      <p className="text-[11px] font-extrabold">بخش آموزشی مربوطه قفل است</p>
                       <p className="text-[9px] text-slate-600">بخش‌های قبلی را کامل کنید تا دسترسی شما فعال شود.</p>
                     </div>
                   )}

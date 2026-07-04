@@ -50,6 +50,19 @@ export interface UserState {
   isPremium?: boolean;
   planType?: string;
   subscriptionDate?: string;
+  currentSubject?: string; // e.g. "surgery" | "cardiology" | "pediatrics" | "gynecology" | "pharmacology"
+}
+
+export type SubjectId = "surgery" | "cardiology" | "pediatrics" | "gynecology" | "pharmacology";
+
+export interface SubjectInfo {
+  id: SubjectId;
+  title: string;
+  englishTitle: string;
+  description: string;
+  icon: string;
+  colorTheme: string;
+  accentColor: string;
 }
 
 export type ViewType = "dashboard" | "lesson" | "result" | "profile" | "settings" | "curriculum";

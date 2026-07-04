@@ -1,10 +1,22 @@
 import { UserState, Chapter, ConceptNode, Exercise } from "../types";
 import contentData from "../data/content.json";
+import { extendedChapters, extendedConcepts, extendedExercises } from "../data/content_extended";
 
-// Cast JSON data to typed interfaces
-export const chapters: Chapter[] = contentData.chapters as Chapter[];
-export const concepts: ConceptNode[] = contentData.concepts as any[];
-export const exercises: Exercise[] = contentData.exercises as any[];
+// Cast JSON data to typed interfaces and merge with extended medical subjects
+export const chapters: Chapter[] = [
+  ...(contentData.chapters as Chapter[]),
+  ...extendedChapters
+];
+
+export const concepts: ConceptNode[] = [
+  ...(contentData.concepts as any[]),
+  ...extendedConcepts
+];
+
+export const exercises: Exercise[] = [
+  ...(contentData.exercises as any[]),
+  ...extendedExercises
+];
 
 const STORAGE_KEY = "medophil_user_state";
 
@@ -16,17 +28,35 @@ export const DEFAULT_STATE: UserState = {
   lastActiveDate: null,
   diagnosisStreak: 0,
   completedConcepts: [],
-  unlockedChapters: ["ch1"],
+  unlockedChapters: ["ch1", "cardio_ch1", "pedi_ch1", "gyn_ch1", "pharma_ch1"],
   chapterProgress: {},
   weakConcepts: {},
   exerciseHistory: {},
+  currentSubject: "surgery"
 };
 
-// Check and update streak when app loads
+// Check and update streak and sanitize state when app loads
 export function checkStreak(state: UserState): UserState {
   const todayStr = new Date().toISOString().split("T")[0];
+  
+  // Backwards compatibility sanitization
+  let unlocked = state.unlockedChapters || [];
+  const defaultUnlocks = ["ch1", "cardio_ch1", "pedi_ch1", "gyn_ch1", "pharma_ch1"];
+  let updatedUnlocked = [...unlocked];
+  defaultUnlocks.forEach(ch => {
+    if (!updatedUnlocked.includes(ch)) {
+      updatedUnlocked.push(ch);
+    }
+  });
+
+  let sanitizedState = {
+    ...state,
+    unlockedChapters: updatedUnlocked,
+    currentSubject: state.currentSubject || "surgery"
+  };
+
   if (!state.lastActiveDate) {
-    return { ...state, dailyStreak: 0 };
+    return { ...sanitizedState, dailyStreak: 0 };
   }
 
   const lastDate = new Date(state.lastActiveDate);
@@ -36,9 +66,9 @@ export function checkStreak(state: UserState): UserState {
 
   if (diffDays > 1) {
     // Streak broken
-    return { ...state, dailyStreak: 0 };
+    return { ...sanitizedState, dailyStreak: 0 };
   }
-  return state;
+  return sanitizedState;
 }
 
 // Load state from localStorage

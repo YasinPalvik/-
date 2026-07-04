@@ -40,23 +40,44 @@ export default function CurriculumPlanner({
   const [filterMode, setFilterMode] = useState<"all" | "completed" | "future">("all");
   const [selectedPreviewConcept, setSelectedPreviewConcept] = useState<ConceptNode | null>(null);
 
-  // Certification requirements calculation
-  const totalChapters = chapters.length;
-  const totalConcepts = concepts.length;
-  const completedConceptsCount = userState.completedConcepts.length;
+  const activeSubjectId = userState.currentSubject || "surgery";
+
+  const getSubjectForChapter = (chapterId: string): string => {
+    if (chapterId.startsWith("cardio_")) return "cardiology";
+    if (chapterId.startsWith("pedi_")) return "pediatrics";
+    if (chapterId.startsWith("gyn_")) return "gynecology";
+    if (chapterId.startsWith("pharma_")) return "pharmacology";
+    return "surgery";
+  };
+
+  const getSubjectName = (id: string) => {
+    if (id === "cardiology") return "بیماری‌های قلب و عروق";
+    if (id === "pediatrics") return "بیماری‌های کودکان";
+    if (id === "gynecology") return "زنان و زایمان";
+    if (id === "pharmacology") return "داروشناسی بالینی";
+    return "جراحی عمومی";
+  };
+
+  const activeChapters = chapters.filter(ch => getSubjectForChapter(ch.id) === activeSubjectId);
+  const activeConcepts = concepts.filter(c => getSubjectForChapter(c.chapterId) === activeSubjectId);
+
+  // Certification requirements calculation per subject
+  const totalChapters = activeChapters.length;
+  const totalConcepts = activeConcepts.length;
+  const completedConceptsCount = activeConcepts.filter(c => userState.completedConcepts.includes(c.id)).length;
   const xpCount = userState.xp;
   
   // Requirements:
-  // 1. At least 6 concepts completed
+  // 1. At least 6 concepts completed (or all concepts if less than 6 exists)
   // 2. At least 300 XP
-  // 3. At least 2 chapters unlocked
-  const minConceptsRequired = 6;
+  // 3. At least 2 chapters unlocked (or all if less than 2 exists)
+  const minConceptsRequired = Math.min(6, totalConcepts);
   const minXpRequired = 300;
-  const minChaptersUnlocked = 2;
+  const minChaptersUnlocked = Math.min(2, totalChapters);
 
   const conceptProgressPercent = Math.min(100, Math.round((completedConceptsCount / minConceptsRequired) * 100));
   const xpProgressPercent = Math.min(100, Math.round((xpCount / minXpRequired) * 100));
-  const chaptersUnlockedCount = userState.unlockedChapters.length;
+  const chaptersUnlockedCount = activeChapters.filter(ch => userState.unlockedChapters.includes(ch.id)).length;
   const chapterProgressPercent = Math.min(100, Math.round((chaptersUnlockedCount / minChaptersUnlocked) * 100));
 
   const totalCertProgress = Math.round((conceptProgressPercent + xpProgressPercent + chapterProgressPercent) / 3);
@@ -66,10 +87,10 @@ export default function CurriculumPlanner({
   const isConceptLearned = (conceptId: string) => userState.completedConcepts.includes(conceptId);
 
   const isConceptUnlocked = (conceptId: string) => {
-    const concept = concepts.find(c => c.id === conceptId);
+    const concept = activeConcepts.find(c => c.id === conceptId);
     if (!concept) return false;
     
-    const chapterIdx = chapters.findIndex(ch => ch.id === concept.chapterId);
+    const chapterIdx = activeChapters.findIndex(ch => ch.id === concept.chapterId);
     if (chapterIdx === 0) {
       return concept.prerequisites.every(pid => userState.completedConcepts.includes(pid));
     }
@@ -80,7 +101,7 @@ export default function CurriculumPlanner({
   };
 
   const getFilteredConcepts = (chapterId: string) => {
-    const chapterConcepts = concepts.filter(c => c.chapterId === chapterId);
+    const chapterConcepts = activeConcepts.filter(c => c.chapterId === chapterId);
     if (filterMode === "completed") {
       return chapterConcepts.filter(c => isConceptLearned(c.id));
     }
@@ -102,14 +123,14 @@ export default function CurriculumPlanner({
             <div className="flex items-center gap-2">
               <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-extrabold text-[10px] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
                 <Compass className="w-3.5 h-3.5 text-indigo-400" />
-                برنامه‌ریز تحصیلی هوشمند جراحی
+                برنامه‌ریز تحصیلی هوشمند {getSubjectName(activeSubjectId)}
               </span>
             </div>
             <h1 className="text-xl md:text-2xl font-black text-white leading-tight">
-              برنامه‌ریز درسی و پایش مسیر گواهی‌نامه جراحی 🩺
+              برنامه‌ریز درسی و پایش مسیر گواهی‌نامه {getSubjectName(activeSubjectId)} 🩺
             </h1>
             <p className="text-xs text-slate-300 leading-relaxed max-w-2xl font-sans">
-              در این بخش می‌توانید ساختار کل آموزش‌های جراحی را به طور یکجا ببینید، مفاهیم آینده را پیش‌نمایش کنید، تله‌های بالینی هر مبحث را مطالعه کنید و فرآیند واجد شرایط شدن خود برای گواهی‌نامه رسمی را پایش کنید.
+              در این بخش می‌توانید ساختار کل آموزش‌های {getSubjectName(activeSubjectId)} را به طور یکجا ببینید، مفاهیم آینده را پیش‌نمایش کنید، تله‌های بالینی هر مبحث را مطالعه کنید و فرآیند واجد شرایط شدن خود برای گواهی‌نامه رسمی را پایش کنید.
             </p>
           </div>
 
@@ -134,7 +155,7 @@ export default function CurriculumPlanner({
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black text-white flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-400 fill-amber-400/10" />
-                پایشگر مسیر گواهی‌نامه جراحی
+                پایشگر مسیر گواهی‌نامه {getSubjectName(activeSubjectId)}
               </h3>
               {isEligibleForCert && (
                 <span className="bg-amber-400 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full animate-pulse shadow-sm">
@@ -143,7 +164,7 @@ export default function CurriculumPlanner({
               )}
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-              با یادگیری مفاهیم جراحی و افزایش امتیاز بالینی، شرایط لازم برای دریافت گواهی‌نامه صلاحیت پزشکی جراحی مدوفیل را تکمیل نمایید.
+              با یادگیری مفاهیم {getSubjectName(activeSubjectId)} و افزایش امتیاز بالینی، شرایط لازم برای دریافت گواهی‌نامه صلاحیت پزشکی {getSubjectName(activeSubjectId)} مدوفیل را تکمیل نمایید.
             </p>
           </div>
 
@@ -205,7 +226,7 @@ export default function CurriculumPlanner({
                 }`}>
                   <Check className="w-2.5 h-2.5" />
                 </div>
-                <span className="text-slate-300">آزادسازی حداقل {minChaptersUnlocked} بخش جراحی</span>
+                <span className="text-slate-300">آزادسازی حداقل {minChaptersUnlocked} بخش تخصصی {getSubjectName(activeSubjectId)}</span>
               </div>
               <span className="font-mono text-slate-400">{chaptersUnlockedCount} / {minChaptersUnlocked}</span>
             </div>
@@ -220,12 +241,12 @@ export default function CurriculumPlanner({
                   className="w-full bg-gradient-to-tr from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center justify-center gap-1.5"
                 >
                   <Award className="w-4 h-4 fill-slate-950" />
-                  <span>مشاهده و پرینت گواهی‌نامه رسمی جراحی</span>
+                  <span>مشاهده و پرینت گواهی‌نامه رسمی {getSubjectName(activeSubjectId)}</span>
                 </button>
               ) : (
                 <div className="space-y-2">
                   <p className="text-[10px] text-amber-300 font-bold leading-normal text-center bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl">
-                    🎉 شما واجد شرایط دریافت مدرک جراحی هستید! برای باز شدن ابزار چاپ، پرونده خود را به طلایی ارتقا دهید.
+                    🎉 شما واجد شرایط دریافت مدرک {getSubjectName(activeSubjectId)} هستید! برای باز شدن ابزار چاپ، پرونده خود را به طلایی ارتقا دهید.
                   </p>
                   <button
                     onClick={onTriggerPremium}
@@ -238,7 +259,7 @@ export default function CurriculumPlanner({
               )
             ) : (
               <div className="bg-slate-950 p-3 rounded-xl text-[10px] text-slate-500 text-center leading-normal border border-white/[0.02]">
-                🔒 شرایط لازم برای صدور مدرک هنوز احراز نشده است. گره‌های جراحی پیش رو در نقشه درسی را به اتمام برسانید.
+                🔒 شرایط لازم برای صدور مدرک هنوز احراز نشده است. گره‌های آموزشی پیش رو در نقشه درسی را به اتمام برسانید.
               </div>
             )}
           </div>
@@ -251,7 +272,7 @@ export default function CurriculumPlanner({
             <div className="text-right">
               <h2 className="text-base font-black text-white flex items-center gap-2">
                 <BookOpenCheck className="w-5 h-5 text-indigo-400" />
-                سرفصل‌های آموزشی و درخت یادگیری جراحی
+                سرفصل‌های آموزشی و درخت یادگیری {getSubjectName(activeSubjectId)}
               </h2>
               <p className="text-[11px] text-slate-400 font-medium">
                 بر روی مفاهیم کلیک کنید تا جزئیات، اهداف یادگیری و تله‌های امتحانی آن‌ها را پیش‌نمایش نمایید.
@@ -278,7 +299,7 @@ export default function CurriculumPlanner({
 
           {/* Chronological Surgical Curriculum Path */}
           <div className="space-y-10">
-            {chapters.map((chapter, chIdx) => {
+            {activeChapters.map((chapter, chIdx) => {
               const unlocked = userState.unlockedChapters.includes(chapter.id) || chIdx === 0;
               const progress = userState.chapterProgress[chapter.id] || 0;
               const chConcepts = getFilteredConcepts(chapter.id);

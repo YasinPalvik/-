@@ -461,6 +461,7 @@ export default function App() {
                   onStartLesson={handleStartLesson}
                   onNavigateTo={(view) => setCurrentView(view as any)}
                   onTriggerPremium={() => setShowPremium(true)}
+                  onUpdateState={handleUpdateState}
                   gravityValue={gravityValue}
                   setGravityValue={setGravityValue}
                   speedFactor={speedFactor}
