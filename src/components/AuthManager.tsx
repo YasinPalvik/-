@@ -427,11 +427,11 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
 
         {/* Brand visual header */}
         <div className="text-center space-y-2 mb-6 pt-2">
-          <div className="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-extrabold mx-auto shadow-sm">
-            <span className="text-xl">M</span>
+          <div className="w-12 h-12 bg-gradient-to-tr from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center text-white font-extrabold mx-auto shadow-sm">
+            <span className="text-xl">K</span>
           </div>
           <div>
-            <h3 className="text-sm font-black text-slate-800">ایجاد حساب کاربری مدوفیل</h3>
+            <h3 className="text-sm font-black text-slate-800">ایجاد حساب کاربری خرچهیار</h3>
             <p className="text-[10px] text-slate-400">ذخیره خودکار پیشرفت، آنالیز زنده و ارتقا به بخش طلایی</p>
           </div>
         </div>
@@ -730,7 +730,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
         </AnimatePresence>
 
         <p className="text-[9px] text-slate-400 text-center leading-relaxed mt-6 border-t pt-4">
-          👨‍⚕️ حساب کاربری مدوفیل به صورت محلی در مرورگر شما ذخیره و هماهنگ می‌شود تا بتوانید به راحتی MVP را تست، و داده‌های پیشرفت چندین کاربر را شبیه‌سازی کنید.
+          👨‍⚕️ حساب کاربری خرچهیار به صورت محلی در مرورگر شما ذخیره و هماهنگ می‌شود تا بتوانید به راحتی MVP را تست، و داده‌های پیشرفت چندین کاربر را شبیه‌سازی کنید.
         </p>
 
       </div>
@@ -755,7 +755,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
               </div>
-              <h3 className="text-sm font-black text-slate-800">انتخاب حساب گوگل (شبیه‌ساز مدوفیل)</h3>
+              <h3 className="text-sm font-black text-slate-800">انتخاب حساب گوگل (شبیه‌ساز خرچهیار 🐰🦊)</h3>
               <p className="text-[10px] text-slate-400">به دلیل عدم دسترسی به کنسول فایربیس، ورود با گوگل در حالت ایمن Sandbox شبیه‌سازی شد.</p>
             </div>
 
@@ -763,7 +763,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
               {[
                 { email: "yasinbagherzadeh18@gmail.com", name: "یاسین باقرزاده" },
                 { email: "dr.rad@gmail.com", name: "دکتر مهران راد" },
-                { email: "medophile.test@gmail.com", name: "پزشک تستر مدوفیل" }
+                { email: "kharchehyar.test@gmail.com", name: "پزشک تستر خرچهیار" }
               ].map((acc) => (
                 <button
                   key={acc.email}
@@ -822,7 +822,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
             <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span className="text-xs font-black tracking-wider">صندوق ورودی شبیه‌سازی شده مدوفیل</span>
+                <span className="text-xs font-black tracking-wider">صندوق ورودی شبیه‌سازی شده خرچهیار 🚔</span>
               </div>
               <button 
                 onClick={() => setSimulatedEmail(null)}
@@ -836,7 +836,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
             <div className="p-4 bg-white border-b border-slate-100 space-y-1.5 text-xs text-slate-600">
               <p>
                 <span className="text-slate-400 font-bold ml-1.5 font-sans">فرستنده:</span>
-                <span className="font-mono text-blue-600">noreply@medophile.ir</span>
+                <span className="font-mono text-blue-600">noreply@kharchehyar.ir</span>
               </p>
               <p>
                 <span className="text-slate-400 font-bold ml-1.5 font-sans">گیرنده:</span>
@@ -845,7 +845,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
               <p>
                 <span className="text-slate-400 font-bold ml-1.5 font-sans">موضوع:</span>
                 <span className="text-slate-900 font-black">
-                  {simulatedEmail.isForgot ? "بازنشانی کلمه عبور مدوفیل" : "تایید و فعال‌سازی حساب کاربری مدوفیل"}
+                  {simulatedEmail.isForgot ? "بازنشانی کلمه عبور خرچهیار" : "تایید و فعال‌سازی حساب کاربری خرچهیار"}
                 </span>
               </p>
             </div>
@@ -854,12 +854,12 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
             <div className="p-6 md:p-8 bg-white flex-1 min-h-[250px] flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-lg font-bold">
-                    M
+                  <div className="w-10 h-10 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center text-lg font-bold">
+                    K
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-800">خوش آمدید به مدوفیل</h4>
-                    <p className="text-[9px] text-slate-400">سیستم مدیریت و پایش علمی پزشکان</p>
+                    <h4 className="text-xs font-black text-slate-800">خوش آمدید به خرچهیار 🚔</h4>
+                    <p className="text-[9px] text-slate-400">سیستم مدیریت و پایش علمی پلیس جراحی زوتوپیا</p>
                   </div>
                 </div>
 
@@ -906,7 +906,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
             </div>
 
             <div className="p-3 bg-slate-100 border-t border-slate-200 text-center text-[10px] text-slate-400 font-bold">
-              🖥️ شبیه‌ساز ارسال ایمیل مدوفیل - تضمین عملکرد ۱۰۰٪ آفلاین و آنلاین
+              🖥️ شبیه‌ساز ارسال ایمیل خرچهیار - تضمین عملکرد ۱۰۰٪ آفلاین و آنلاین
             </div>
 
           </div>
