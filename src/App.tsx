@@ -13,7 +13,8 @@ import AuthManager from "./components/AuthManager";
 import SurgicalCertificate from "./components/SurgicalCertificate";
 import AntigravityCanvas from "./components/AntigravityCanvas";
 import MinooChat from "./components/MinooChat";
-import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare } from "lucide-react";
+import CurriculumPlanner from "./components/CurriculumPlanner";
+import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -277,6 +278,20 @@ export default function App() {
                 </button>
 
                 <button
+                  onClick={() => { setCurrentView("curriculum"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    currentView === "curriculum"
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Compass className="w-4 h-4 text-indigo-400" />
+                    <span>برنامه‌ریز درسی و مدرک</span>
+                  </div>
+                </button>
+
+                <button
                   onClick={() => { setCurrentView("profile"); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     currentView === "profile"
@@ -399,7 +414,7 @@ export default function App() {
               <div className="text-right">
                 <span className="text-[10px] font-extrabold text-indigo-400 tracking-wide block">سامانه پایش پزشکان</span>
                 <h2 className="text-xs font-black text-white">
-                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : "تنظیمات عمومی پرونده"}
+                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "curriculum" ? "برنامه‌ریز درسی و صدور مدرک" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : "تنظیمات عمومی پرونده"}
                 </h2>
               </div>
             </div>
@@ -492,6 +507,25 @@ export default function App() {
                   heartsRemaining={userState.hearts}
                   isReview={isReviewSession}
                   onNavigateHome={() => setCurrentView("dashboard")}
+                />
+              </motion.div>
+            )}
+
+            {/* Curriculum Planner View */}
+            {currentView === "curriculum" && (
+              <motion.div
+                key="curriculum"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+              >
+                <CurriculumPlanner
+                  userState={userState}
+                  onStartLesson={handleStartLesson}
+                  onNavigateHome={() => setCurrentView("dashboard")}
+                  onTriggerCertificate={() => setShowCertificate(true)}
+                  onTriggerPremium={() => setShowPremium(true)}
                 />
               </motion.div>
             )}

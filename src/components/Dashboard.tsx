@@ -263,7 +263,7 @@ export default function Dashboard({
         <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 text-right">
           <div className="w-20 h-20 shrink-0 bg-slate-950/80 rounded-full overflow-hidden border border-white/10 flex items-center justify-center relative shadow-[0_0_20px_rgba(99,102,241,0.2)]">
             <img 
-              src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Health%20worker/3D/health_worker_3d.png" 
+              src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Health%20worker/Default/3D/health_worker_3d_default.png" 
               alt="Health Worker 3D" 
               referrerPolicy="no-referrer"
               className="w-14 h-14 object-contain"

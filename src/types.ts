@@ -17,6 +17,9 @@ export interface ConceptNode {
   prerequisites: string[];
   highStakes: boolean;
   distractors: string[];
+  narrativeHook?: string;
+  examTrap?: boolean;
+  examTrapNote?: string;
 }
 
 export interface Exercise {
@@ -49,4 +52,4 @@ export interface UserState {
   subscriptionDate?: string;
 }
 
-export type ViewType = "dashboard" | "lesson" | "result" | "profile" | "settings";
+export type ViewType = "dashboard" | "lesson" | "result" | "profile" | "settings" | "curriculum";

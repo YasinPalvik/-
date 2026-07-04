@@ -707,8 +707,37 @@ export default function Lesson({ chapterId, isReview, userState, onLessonComplet
                   </h2>
                 </div>
 
-                <div className="bg-white/50 border border-white/60 p-6 rounded-2xl leading-relaxed text-sm text-slate-700 font-sans whitespace-pre-line shadow-2xs">
-                  {activeSlide.concept.definition}
+                <div className="space-y-4">
+                  {activeSlide.concept.narrativeHook ? (
+                    <div className="bg-amber-50/20 border border-amber-200/50 p-6 rounded-2xl leading-relaxed text-sm text-slate-700 font-sans whitespace-pre-line shadow-2xs">
+                      <div className="text-[10px] text-amber-700 font-black mb-2 flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>شرح داستانی و مثال بالینی (Narrative Hook)</span>
+                      </div>
+                      {activeSlide.concept.narrativeHook}
+                    </div>
+                  ) : (
+                    <div className="bg-white/50 border border-white/60 p-6 rounded-2xl leading-relaxed text-sm text-slate-700 font-sans whitespace-pre-line shadow-2xs">
+                      {activeSlide.concept.definition}
+                    </div>
+                  )}
+
+                  {activeSlide.concept.examTrap && activeSlide.concept.examTrapNote && (
+                    <div className="bg-rose-50 border border-rose-200 p-5 rounded-2xl leading-relaxed text-xs text-rose-950 space-y-2 text-right shadow-2xs">
+                      <div className="flex items-center gap-2 text-rose-800 font-black">
+                        <Skull className="w-4 h-4 animate-pulse" />
+                        <span>⚠️ تله‌ی امتحانی بالینی (Exam Trap)</span>
+                      </div>
+                      <p className="font-sans leading-relaxed">{activeSlide.concept.examTrapNote}</p>
+                    </div>
+                  )}
+
+                  {activeSlide.concept.narrativeHook && (
+                    <div className="bg-slate-50/60 border border-slate-200/60 p-4 rounded-xl leading-relaxed text-xs text-slate-600 font-sans whitespace-pre-line">
+                      <div className="font-bold text-slate-500 mb-1">خلاصه علمی اتمی (Atomic Definition):</div>
+                      {activeSlide.concept.definition}
+                    </div>
+                  )}
                 </div>
 
                 <div className="text-xs text-slate-400 leading-relaxed">
