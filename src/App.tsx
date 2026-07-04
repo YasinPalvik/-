@@ -220,50 +220,24 @@ export default function App() {
           }`}>
             <div className="p-6 space-y-8">
               {/* Brand Header */}
-              <div className="flex flex-col gap-4 pb-6 border-b border-white/5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setCurrentView("dashboard"); setIsSidebarOpen(false); }}>
-                    <div className="w-10 h-10 bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 rounded-xl flex items-center justify-center text-white font-extrabold shadow-[0_0_15px_rgba(249,115,22,0.3)]">
-                      <span className="text-lg">خ</span>
-                    </div>
-                    <div>
-                      <h1 className="text-sm font-black text-white leading-none">خرچهیار</h1>
-                      <span className="text-[9px] text-amber-400 font-extrabold tracking-wider uppercase">پلیس جراحی زوتوپیا</span>
-                    </div>
+              <div className="flex items-center justify-between pb-6 border-b border-white/5">
+                <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setCurrentView("dashboard"); setIsSidebarOpen(false); }}>
+                  <div className="w-10 h-10 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-extrabold shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                    <span className="text-lg">M</span>
                   </div>
-                  
-                  {/* Close Button Mobile only */}
-                  <button 
-                    onClick={() => setIsSidebarOpen(false)}
-                    className="md:hidden text-slate-400 hover:text-white p-1 hover:bg-white/5 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Zootopia Companion Card with Judy and Nick Dialogue */}
-                <div className="bg-slate-900/60 border border-white/5 p-3 rounded-2xl flex items-start gap-3 relative overflow-hidden group">
-                  <div className="absolute -left-2 -bottom-2 w-16 h-16 opacity-10 pointer-events-none">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/en/9/9c/Judy_Hopps.png" 
-                      alt="Judy shadow"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div className="w-10 h-10 shrink-0 rounded-full bg-slate-950 overflow-hidden border border-white/10 flex items-center justify-center relative">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/en/9/9c/Judy_Hopps.png" 
-                      alt="Judy Hopps"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover object-top scale-125 translate-y-1.5"
-                    />
-                  </div>
-                  <div className="text-right space-y-1 min-w-0">
-                    <p className="text-[10px] font-black text-amber-300">افسر جودی هاپس 🐰</p>
-                    <p className="text-[9px] text-slate-300 leading-relaxed font-medium">«هی دکتر! آماده‌ای کانون‌های خطای زوتوپیا رو دستگیر کنیم؟ هر خطایی رو مثل جرم پیگیری می‌کنیم!»</p>
+                  <div>
+                    <h1 className="text-sm font-black text-white leading-none">مدوفیل</h1>
+                    <span className="text-[9px] text-indigo-400 font-extrabold tracking-wider uppercase">آموزش جراحی بالینی</span>
                   </div>
                 </div>
+                
+                {/* Close Button Mobile only */}
+                <button 
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="md:hidden text-slate-400 hover:text-white p-1 hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
               {/* Navigation Menu */}
@@ -521,8 +495,8 @@ export default function App() {
         {/* Global Footer (Frosted Glassmorphic layout) */}
         {currentView !== "lesson" && currentView !== "result" && (
           <footer className="border-t border-white/5 py-6 px-4 md:px-8 text-center text-[11px] text-slate-500 font-medium">
-            <p className="font-sans">سامانه خرچهیار (Kharchehyar) © {new Date().getFullYear()} - پلتفرم هوشمند جراحی بالینی به سبک ماجراجویی زوتوپیا 🦊🐰</p>
-            <p className="text-[10px] text-slate-600 mt-1">تلفیق کمدی انیمیشنی با شبیه‌ساز جراحی واقعی برای ارتقای سلامت جامعه</p>
+            <p className="font-sans">مدوفیل (Medophil) © {new Date().getFullYear()} - پلتفرم هوشمند جراحی بالینی به سبک گیمیفاید</p>
+            <p className="text-[10px] text-slate-600 mt-1">تلفیق تجارب آموزشی و هوش محاسباتی برای ارتقای سلامت جامعه</p>
           </footer>
         )}
       </div>

@@ -65,7 +65,7 @@ export default function Profile({ userState, onNavigateHome, onTriggerReview, on
             <div className="space-y-1 text-right">
               <div className="flex items-center gap-2.5">
                 <h3 className="text-base font-black text-slate-100">
-                  دکتر {userState.fullName || "کارآموز مهمان خرچهیار"}
+                  دکتر {userState.fullName || "کاربر مهمان مدوفیل"}
                 </h3>
                 {userState.isPremium ? (
                   <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
@@ -79,7 +79,7 @@ export default function Profile({ userState, onNavigateHome, onTriggerReview, on
                 )}
               </div>
               <p className="text-[11px] text-slate-400 font-mono" dir="ltr">
-                {userState.email ? userState.email : "guest_surgeon@kharchehyar.ir"}
+                {userState.email ? userState.email : "guest_surgeon@medophil.ir"}
               </p>
             </div>
           </div>

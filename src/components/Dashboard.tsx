@@ -222,40 +222,40 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
   return (
     <div className="space-y-8" dir="rtl">
       
-      {/* Zootopia Police & Surgical Department Banner */}
+      {/* Medophil Headquarter & Surgical Department Banner */}
       <div className="bg-gradient-to-r from-indigo-950/80 via-slate-900/60 to-purple-950/80 border border-white/10 p-6 rounded-[32px] relative overflow-hidden shadow-2xl">
-        <div className="absolute right-0 top-0 w-48 h-48 bg-amber-500/10 rounded-full blur-[80px]" />
-        <div className="absolute left-10 top-1/2 -translate-y-1/2 w-32 h-32 hidden md:block select-none pointer-events-none">
+        <div className="absolute right-0 top-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-[80px]" />
+        <div className="absolute left-10 top-1/2 -translate-y-1/2 w-28 h-28 hidden md:block select-none pointer-events-none">
           <img 
-            src="https://upload.wikimedia.org/wikipedia/en/d/db/Nick_Wilde_Zootopia.png" 
-            alt="Nick Wilde" 
+            src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Stethoscope/3D/stethoscope_3d.png" 
+            alt="Stethoscope 3D" 
             referrerPolicy="no-referrer"
-            className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(249,115,22,0.3)] hover:scale-110 transition-transform duration-300"
+            className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(99,102,241,0.3)] hover:scale-110 transition-transform duration-300"
           />
         </div>
         
         <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 text-right">
-          <div className="w-20 h-20 shrink-0 bg-slate-950/80 rounded-full overflow-hidden border border-white/10 flex items-center justify-center relative shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+          <div className="w-20 h-20 shrink-0 bg-slate-950/80 rounded-full overflow-hidden border border-white/10 flex items-center justify-center relative shadow-[0_0_20px_rgba(99,102,241,0.2)]">
             <img 
-              src="https://upload.wikimedia.org/wikipedia/en/9/9c/Judy_Hopps.png" 
-              alt="Judy Hopps" 
+              src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Health%20worker/3D/health_worker_3d.png" 
+              alt="Health Worker 3D" 
               referrerPolicy="no-referrer"
-              className="w-full h-full object-cover object-top scale-125 translate-y-3"
+              className="w-14 h-14 object-contain"
             />
           </div>
 
           <div className="flex-1 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-amber-400 text-slate-950 font-black text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
-                🚔 پلیس جراحی زوتوپیا
+              <span className="bg-indigo-500 text-white font-black text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
+                🎓 آکادمی شبیه‌سازی جراحی
               </span>
-              <span className="text-[10px] text-amber-300 font-extrabold font-mono">خرچهیار (دستیار تخصصی جراحی)</span>
+              <span className="text-[10px] text-indigo-300 font-extrabold font-mono">مدوفیل (دستیار تخصصی جراحی)</span>
             </div>
             <h2 className="text-xl font-black text-white leading-snug">
-              خوش آمدید، همکار بالینی! به مقر جراحی افسر جودی و نیک خوش آمدید 🩺
+              خوش آمدید، همکار بالینی! به مقر شبیه‌سازی جراحی مدوفیل خوش آمدید 🩺
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-              اینجا تو زوتوپیا، ما هر خطای بالینی رو مثل یه پرونده جنایی مرموز حل می‌کنیم! با تمرین‌های فاصله‌دار، مهارت جراحی خودت رو بالا ببر و نذار مجرمین (عوامل بیماری‌زا و سوء‌تشخیص‌ها) فرار کنن!
+              با تمرین‌های شبیه‌سازی بالینی و متد تکرار فاصله‌دار، مهارت جراحی خودت رو ارتقا بده و تصمیم‌گیری بالینی دقیق رو در محیطی تعاملی و جذاب تمرین کن!
             </p>
           </div>
         </div>
@@ -583,10 +583,10 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
               <div className="flex items-center justify-between">
                 <div className="text-right">
                   <h3 className="text-xs font-black text-white flex items-center gap-1.5">
-                    <TrendingUp className="w-4 h-4 text-amber-400" />
-                    رتبه‌بندی کارآگاهان زوتوپیا 🚔
+                    <TrendingUp className="w-4 h-4 text-indigo-400" />
+                    رده‌بندی پزشکان بالینی
                   </h3>
-                  <p className="text-[9px] text-slate-400">برترین افسران جراحی خرچهیار</p>
+                  <p className="text-[9px] text-slate-400">لیست برترین دانشجویان مدوفیل</p>
                 </div>
                 <div className="w-8 h-8 shrink-0">
                   <img 

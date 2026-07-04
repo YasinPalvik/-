@@ -9,7 +9,7 @@ interface SurgicalCertificateProps {
 }
 
 export default function SurgicalCertificate({ userState, onClose }: SurgicalCertificateProps) {
-  const [userName, setUserName] = useState(userState.fullName || "پزشک کارآموز خرچهیار");
+  const [userName, setUserName] = useState(userState.fullName || "پزشک کارآموز مدوفیل");
   const [isSaved, setIsSaved] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -86,23 +86,23 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                   <div className="w-10 h-10 border-2 border-amber-800/30 rounded-full flex items-center justify-center text-amber-800/80">
                     <Award className="w-6 h-6 fill-amber-50" />
                   </div>
-                  <span className="text-[9px] font-black text-amber-900 tracking-widest">KHARCHEHYAR</span>
+                  <span className="text-[9px] font-black text-amber-900 tracking-widest">MEDOPHIL</span>
                 </div>
 
                 <div className="text-left space-y-0.5">
-                  <div>وضعیت: کارآگاه ارشد طلایی (Premium)</div>
-                  <div>سیستم جراحی پلیس زوتوپیا</div>
+                  <div>وضعیت: کارنامه طلایی (Premium)</div>
+                  <div>سیستم آموزشی گیمیفاید</div>
                 </div>
               </div>
 
               {/* Certificate content text */}
               <div className="space-y-4 my-auto pt-4">
                 <h2 className="text-lg font-black text-amber-950 tracking-wide font-sans">
-                  گواهی‌نامه شایستگی شبیه‌سازی بالینی جراحی زوتوپیا
+                  گواهی‌نامه شایستگی شبیه‌سازی بالینی جراحی
                 </h2>
                 
                 <p className="text-[10px] text-slate-400 tracking-wider">
-                  ZOOTOPIA SURGICAL POLICE ACADEMY OF EXCELLENCE
+                  CERTIFICATE OF SURGICAL SIMULATION EXCELLENCE
                 </p>
 
                 <div className="space-y-4">
@@ -115,7 +115,7 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                   </h3>
 
                   <p className="text-xs text-slate-600 leading-relaxed max-w-lg mx-auto font-sans text-justify">
-                    با طی نمودن موفقیت‌آمیز دوره‌های پیشرفته آموزش بالینی جراحی، شبیه‌سازی سناریوهای بحرانی پرخطر (High-Stakes)، پایش دقیق علائم تشخیصی و کنترل کامل جان‌های بالینی در مقر پلیس جراحی شبیه‌ساز <strong>خرچهیار</strong>، شایستگی علمی و تصمیم‌گیری چابک خود را در سطح جراحان طراز اول زوتوپیا با بالاترین نمره تایید نموده‌اند.
+                    با طی نمودن موفقیت‌آمیز دوره‌های پیشرفته آموزش بالینی جراحی، شبیه‌سازی سناریوهای بحرانی پرخطر (High-Stakes)، پایش دقیق علائم تشخیصی و کنترل کامل جان‌های بالینی در بیمارستان شبیه‌ساز <strong>مدوفیل</strong>، شایستگی علمی و تصمیم‌گیری چابک خود را در سطح جراحان طراز اول با بالاترین نمره تایید نموده‌اند.
                   </p>
                 </div>
               </div>
@@ -125,9 +125,9 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                 
                 {/* Sign 1 */}
                 <div className="text-center space-y-1">
-                  <span className="text-[8px] text-slate-400 block">ریاست دپارتمان جراحی زوتوپیا</span>
+                  <span className="text-[8px] text-slate-400 block">دبیر شورای آموزش جراحی</span>
                   <div className="w-20 h-6 border-b border-amber-800/20 border-dotted mx-auto flex items-center justify-center">
-                    <span className="text-[9px] text-sky-600 font-serif italic">افسر جودی هاپس 🐰</span>
+                    <span className="text-[9px] text-sky-600 font-serif italic">دکتر سهرابی</span>
                   </div>
                 </div>
 
@@ -137,14 +137,14 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                     <Sparkles className="w-5 h-5" />
                     <div className="absolute inset-0 border border-amber-500 rounded-full scale-90 border-dashed"></div>
                   </div>
-                  <span className="text-[7px] text-amber-800/80 font-bold block mt-1">مهر رسمی پلیس زوتوپیا</span>
+                  <span className="text-[7px] text-amber-800/80 font-bold block mt-1">مهر رسمی شبیه‌ساز مدوفیل</span>
                 </div>
 
                 {/* Sign 2 */}
                 <div className="text-center space-y-1">
-                  <span className="text-[8px] text-slate-400 block">ریاست آکادمی بالینی خرچهیار</span>
+                  <span className="text-[8px] text-slate-400 block">ریاست بورد پزشکی مدوفیل</span>
                   <div className="w-20 h-6 border-b border-amber-800/20 border-dotted mx-auto flex items-center justify-center">
-                    <span className="text-[9px] text-indigo-600 font-serif italic">کارآگاه نیک وایلد 🦊</span>
+                    <span className="text-[9px] text-indigo-600 font-serif italic">دکتر باقرزاده</span>
                   </div>
                 </div>
 
