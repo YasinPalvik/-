@@ -47,6 +47,16 @@ interface DashboardProps {
   onStartLesson: (chapterId: string, isReview: boolean) => void;
   onNavigateTo: (view: "profile" | "settings") => void;
   onTriggerPremium: () => void;
+  
+  // Antigravity dynamic simulation control states passed from App.tsx
+  gravityValue: number;
+  setGravityValue: (v: number) => void;
+  speedFactor: number;
+  setSpeedFactor: (v: number) => void;
+  magneticMode: "attract" | "repel" | "orbit" | "off";
+  setMagneticMode: (v: "attract" | "repel" | "orbit" | "off") => void;
+  themeColor: "indigo" | "cyan" | "rose" | "emerald" | "amber";
+  setThemeColor: (v: "indigo" | "cyan" | "rose" | "emerald" | "amber") => void;
 }
 
 // Creative medical-tech glowing color themes for Bento layout
@@ -143,7 +153,21 @@ const chapterThemes = [
   }
 ];
 
-export default function Dashboard({ userState, currentUser, onStartLesson, onNavigateTo, onTriggerPremium }: DashboardProps) {
+export default function Dashboard({ 
+  userState, 
+  currentUser, 
+  onStartLesson, 
+  onNavigateTo, 
+  onTriggerPremium,
+  gravityValue,
+  setGravityValue,
+  speedFactor,
+  setSpeedFactor,
+  magneticMode,
+  setMagneticMode,
+  themeColor,
+  setThemeColor
+}: DashboardProps) {
   const [selectedConcept, setSelectedConcept] = useState<any | null>(null);
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
 
@@ -219,6 +243,8 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
     { name: "ج", active: false, isToday: false },
   ];
 
+  const isAdmin = userState.email === "yasinbagherzadeh18@gmail.com" || currentUser?.email === "yasinbagherzadeh18@gmail.com";
+
   return (
     <div className="space-y-8" dir="rtl">
       
@@ -264,8 +290,135 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
       {/* ----------------- ASYMMETRICAL BENTO GRID SYSTEM ----------------- */}
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 auto-rows-auto">
         
+        {/* 🌌 Antigravity Cosmic Physics Laboratory Console */}
+        {isAdmin && (
+          <div className="lg:col-span-12 bg-slate-950/70 border border-indigo-500/20 rounded-[32px] p-6 shadow-[0_0_35px_rgba(99,102,241,0.12)] backdrop-blur-2xl relative overflow-hidden flex flex-col gap-6">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-transparent pointer-events-none" />
+            <div className="absolute right-0 bottom-0 w-32 h-32 bg-gradient-to-tl from-purple-500/10 to-transparent pointer-events-none" />
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4 relative z-10">
+              <div className="text-right space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                  <h2 className="text-sm font-black text-slate-100 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-indigo-400" />
+                    آزمایشگاه فیزیک و میدان گرانشی آنتی‌گراویتی (Antigravity Deck) 🚀
+                  </h2>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+                  تنظیم زنده میدان گرانشی، سرعت کوانتومی، و واکنش اشاره‌گر پس‌زمینه. برای معلق کردن کارت‌ها، جاذبه را به زیر صفر کاهش دهید!
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] bg-slate-900 border border-white/5 text-indigo-300 font-mono font-bold px-3 py-1.5 rounded-xl">
+                  وضعیت گرانش: {gravityValue < 0 ? "⚠️ تعلیق آنتی‌گراویتی فعال" : gravityValue === 0 ? "🌌 گرانش صفر" : "🪐 جاذبه معمولی"}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+              {/* Control 1: Gravity strength */}
+              <div className="space-y-2 text-right">
+                <label className="text-[10px] font-bold text-slate-400 flex items-center justify-between">
+                  <span>شدت گرانش کیهانی (Vector Gravity)</span>
+                  <span className="text-indigo-400 font-mono font-bold" dir="ltr">{gravityValue.toFixed(1)} G</span>
+                </label>
+                <input
+                  type="range"
+                  min="-1.5"
+                  max="1.5"
+                  step="0.1"
+                  value={gravityValue}
+                  onChange={(e) => setGravityValue(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-indigo-500 border border-white/5"
+                />
+                <div className="flex justify-between text-[8px] text-slate-500 font-bold font-sans">
+                  <span>تعلیق کامل (Floating)</span>
+                  <span>جاذبه خنثی</span>
+                  <span>جاذبه زمین</span>
+                </div>
+              </div>
+
+              {/* Control 2: Particle Speed */}
+              <div className="space-y-2 text-right">
+                <label className="text-[10px] font-bold text-slate-400 flex items-center justify-between">
+                  <span>سرعت جریان ذرات (Velocity)</span>
+                  <span className="text-indigo-400 font-mono font-bold" dir="ltr">{speedFactor.toFixed(1)}x</span>
+                </label>
+                <input
+                  type="range"
+                  min="0.2"
+                  max="2.5"
+                  step="0.1"
+                  value={speedFactor}
+                  onChange={(e) => setSpeedFactor(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-indigo-500 border border-white/5"
+                />
+                <div className="flex justify-between text-[8px] text-slate-500 font-bold font-sans">
+                  <span>جریان آرام</span>
+                  <span>نرمال</span>
+                  <span>فرکانس بالا</span>
+                </div>
+              </div>
+
+              {/* Control 3: Pointer Force Field */}
+              <div className="space-y-2 text-right">
+                <label className="text-[10px] font-bold text-slate-400">
+                  میدان مغناطیسی اشاره‌گر (Cursor Force)
+                </label>
+                <div className="grid grid-cols-4 gap-1 p-0.5 bg-slate-900 border border-white/5 rounded-xl">
+                  {(["repel", "attract", "orbit", "off"] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => setMagneticMode(mode)}
+                      className={`text-[9px] py-1.5 rounded-lg transition-all font-black ${
+                        magneticMode === mode
+                          ? "bg-indigo-600 text-white shadow-sm"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      {mode === "repel" ? "دفع" : mode === "attract" ? "جذب" : mode === "orbit" ? "مدار" : "بسته"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Control 4: Theme spectrum */}
+              <div className="space-y-2 text-right">
+                <label className="text-[10px] font-bold text-slate-400">
+                  طیف نور سحابی پس‌زمینه (Nebula Spectrum)
+                </label>
+                <div className="flex items-center gap-3.5 pt-1.5 justify-center md:justify-start">
+                  {(["indigo", "cyan", "rose", "emerald", "amber"] as const).map((color) => {
+                    const circleColors = {
+                      indigo: "bg-indigo-500 shadow-indigo-500/50",
+                      cyan: "bg-cyan-500 shadow-cyan-500/50",
+                      rose: "bg-rose-500 shadow-rose-500/50",
+                      emerald: "bg-emerald-500 shadow-emerald-500/50",
+                      amber: "bg-amber-500 shadow-amber-500/50",
+                    };
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => setThemeColor(color)}
+                        className={`w-4 h-4 rounded-full ${circleColors[color]} transition-all relative ${
+                          themeColor === color
+                            ? "ring-2 ring-white ring-offset-2 ring-offset-slate-950 scale-120"
+                            : "hover:scale-110 opacity-70"
+                        }`}
+                        title={color}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Bento Stat Card 1: Study Streak with 3D interactive tilt */}
-        <Tilt3D className="lg:col-span-3 md:col-span-2">
+        <Tilt3D className={`lg:col-span-3 md:col-span-2 ${gravityValue < 0 ? "animate-levitate" : ""}`}>
           <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-orange-500/40 group h-full relative overflow-hidden">
             <div className="space-y-1 text-right">
               <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">تداوم مطالعه (Streak)</p>
@@ -286,7 +439,7 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
         </Tilt3D>
 
         {/* Bento Stat Card 2: XP Points with 3D interactive tilt */}
-        <Tilt3D className="lg:col-span-3 md:col-span-2">
+        <Tilt3D className={`lg:col-span-3 md:col-span-2 ${gravityValue < 0 ? "animate-levitate-delayed" : ""}`}>
           <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-blue-500/40 group h-full relative overflow-hidden">
             <div className="space-y-1 text-right">
               <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">امتیاز تجربه (XP)</p>
@@ -307,7 +460,7 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
         </Tilt3D>
 
         {/* Bento Stat Card 3: Diagnosis Streak with 3D interactive tilt */}
-        <Tilt3D className="lg:col-span-3 md:col-span-2">
+        <Tilt3D className={`lg:col-span-3 md:col-span-2 ${gravityValue < 0 ? "animate-levitate" : ""}`}>
           <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-emerald-500/40 group h-full relative overflow-hidden">
             <div className="space-y-1 text-right">
               <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">تشخیص پی‌در‌پی</p>
@@ -329,7 +482,7 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
         </Tilt3D>
 
         {/* Bento Stat Card 4: Clinical Hearts with 3D interactive tilt */}
-        <Tilt3D className="lg:col-span-3 md:col-span-2">
+        <Tilt3D className={`lg:col-span-3 md:col-span-2 ${gravityValue < 0 ? "animate-levitate-delayed" : ""}`}>
           <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-rose-500/40 group h-full relative overflow-hidden">
             <div className="space-y-1 text-right">
               <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">جان‌های بالینی</p>

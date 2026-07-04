@@ -11,6 +11,7 @@ import Settings from "./components/Settings";
 import PremiumPortal from "./components/PremiumPortal";
 import AuthManager from "./components/AuthManager";
 import SurgicalCertificate from "./components/SurgicalCertificate";
+import AntigravityCanvas from "./components/AntigravityCanvas";
 import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -26,6 +27,12 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Antigravity dynamic simulation control states
+  const [gravityValue, setGravityValue] = useState<number>(0);
+  const [speedFactor, setSpeedFactor] = useState<number>(1);
+  const [magneticMode, setMagneticMode] = useState<"attract" | "repel" | "orbit" | "off">("repel");
+  const [themeColor, setThemeColor] = useState<"indigo" | "cyan" | "rose" | "emerald" | "amber">("indigo");
 
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
@@ -203,6 +210,14 @@ export default function App() {
       <div className="fixed top-[-10%] right-[10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
       <div className="fixed bottom-[10%] left-[5%] w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
       <div className="fixed top-[40%] left-[40%] w-[350px] h-[350px] bg-purple-500/5 rounded-full blur-[110px] pointer-events-none z-0"></div>
+
+      {/* 🌌 Antigravity Interactive Starfield Background */}
+      <AntigravityCanvas
+        gravityValue={gravityValue}
+        speedFactor={speedFactor}
+        magneticMode={magneticMode}
+        themeColor={themeColor}
+      />
 
       {/* 1. RIGHT SIDEBAR: Responsive Collapsible Panel (Cruip Style layout) */}
       {currentView !== "lesson" && currentView !== "result" && (
@@ -411,6 +426,14 @@ export default function App() {
                   onStartLesson={handleStartLesson}
                   onNavigateTo={(view) => setCurrentView(view as any)}
                   onTriggerPremium={() => setShowPremium(true)}
+                  gravityValue={gravityValue}
+                  setGravityValue={setGravityValue}
+                  speedFactor={speedFactor}
+                  setSpeedFactor={setSpeedFactor}
+                  magneticMode={magneticMode}
+                  setMagneticMode={setMagneticMode}
+                  themeColor={themeColor}
+                  setThemeColor={setThemeColor}
                 />
               </motion.div>
             )}

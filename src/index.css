@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+@keyframes levitate {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes levitate-delayed {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(-1deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.animate-levitate {
+  animation: levitate 5s ease-in-out infinite;
+}
+
+.animate-levitate-delayed {
+  animation: levitate-delayed 7s ease-in-out infinite;
+}
