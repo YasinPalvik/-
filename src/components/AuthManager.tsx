@@ -3,7 +3,14 @@ import { UserState } from "../types";
 import { DEFAULT_STATE } from "../lib/state";
 import { verifyPremiumAccount } from "../lib/premium_verifier";
 import { auth, googleAuthProvider } from "../lib/firebase.ts";
-import { signInWithPopup } from "firebase/auth";
+import { 
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updateProfile
+} from "firebase/auth";
 import { 
   User, 
   Mail, 
@@ -70,7 +77,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
     }
   };
 
-  // Load all accounts registered locally
+  // Load all accounts registered locally (preserved for compatibility/fallback)
   const getRegisteredAccounts = (): StoredAccount[] => {
     try {
       const data = localStorage.getItem(STORAGE_ACCOUNTS_KEY);
@@ -80,7 +87,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
     }
   };
 
-  // Save all accounts registered locally
+  // Save all accounts registered locally (preserved for compatibility/fallback)
   const saveRegisteredAccounts = (accounts: StoredAccount[]) => {
     try {
       localStorage.setItem(STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts));
@@ -89,7 +96,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -109,45 +116,70 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const accounts = getRegisteredAccounts();
-      const exists = accounts.some(acc => acc.email.toLowerCase() === email.toLowerCase());
+    try {
+      // 1. Create real user account in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const user = userCredential.user;
 
-      if (exists) {
-        setError("این ایمیل قبلاً ثبت‌نام شده است.");
-        setIsLoading(false);
-        return;
-      }
+      // 2. Set full name as Display Name in Firebase profile
+      await updateProfile(user, { displayName: fullName.trim() });
 
-      // Create new account starting with current progress or base default
-      // This is a great UX touch! It preserves guest progress upon registration
+      // 3. Send real email verification to the registered user
+      await sendEmailVerification(user);
+
+      // Check if the credentials used match a manually generated premium account
+      const isPremiumCredential = verifyPremiumAccount(email, password);
+
+      // 4. Set state correctly
       const newUserState: UserState = {
         ...userState,
-        email: email,
-        fullName: fullName,
+        email: email.trim().toLowerCase(),
+        fullName: fullName.trim(),
+        ...(isPremiumCredential ? {
+          isPremium: true,
+          planType: "lifetime",
+          hearts: 5,
+          subscriptionDate: new Date().toISOString().split("T")[0]
+        } : {})
       };
 
-      const newAccount: StoredAccount = {
-        email: email.toLowerCase(),
-        fullName: fullName,
-        passwordHash: password, // simple simulated hashing
-        state: newUserState,
-      };
-
-      accounts.push(newAccount);
-      saveRegisteredAccounts(accounts);
       onUpdateState(newUserState);
 
-      setIsLoading(false);
-      setSuccess("ثبت‌نام شما با موفقیت انجام شد! حساب متصل گردید.");
+      // Save to local list for backward compatibility
+      const accounts = getRegisteredAccounts();
+      const cleanEmail = email.trim().toLowerCase();
+      if (!accounts.some(acc => acc.email.toLowerCase() === cleanEmail)) {
+        accounts.push({
+          email: cleanEmail,
+          fullName: fullName.trim(),
+          passwordHash: password,
+          state: newUserState
+        });
+        saveRegisteredAccounts(accounts);
+      }
+
+      setSuccess("ثبت‌نام با موفقیت انجام شد! ایمیل تایید حساب برای شما ارسال گردید.");
       
       setTimeout(() => {
         onClose();
       }, 1500);
-    }, 1000);
+    } catch (e: any) {
+      console.error("Firebase email/password signup failed:", e);
+      if (e.code === "auth/email-already-in-use") {
+        setError("این ایمیل قبلاً ثبت‌نام شده است.");
+      } else if (e.code === "auth/weak-password") {
+        setError("کلمه عبور بسیار ضعیف است. باید حداقل ۶ کاراکتر باشد.");
+      } else if (e.code === "auth/invalid-email") {
+        setError("فرمت ایمیل وارد شده نامعتبر است.");
+      } else {
+        setError("ثبت‌نام با خطا مواجه شد. لطفاً دوباره تلاش کنید.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -159,76 +191,61 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      // 1. Check if the login credentials match a manually generated premium account
+    try {
       const isPremiumCredential = verifyPremiumAccount(email, password);
-      
-      let account: StoredAccount | undefined;
-      const accounts = getRegisteredAccounts();
+      let userCredential;
+
+      try {
+        userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      } catch (loginErr: any) {
+        // If they used an offline premium account that is not yet in Firebase, auto-register them
+        if (isPremiumCredential && (loginErr.code === "auth/user-not-found" || loginErr.code === "auth/invalid-credential")) {
+          userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+          const user = userCredential.user;
+          const displayUsername = email.includes("@") ? email.split("@")[0] : email;
+          await updateProfile(user, { displayName: displayUsername });
+          await sendEmailVerification(user);
+        } else {
+          throw loginErr;
+        }
+      }
+
+      const user = userCredential.user;
+      const displayName = user.displayName || (email.includes("@") ? email.split("@")[0] : email);
 
       if (isPremiumCredential) {
-        const cleanEmail = email.trim().toLowerCase();
-        const existingAcc = accounts.find(acc => acc.email.toLowerCase() === cleanEmail);
-        
-        if (existingAcc) {
-          account = existingAcc;
-          account.state.isPremium = true;
-          account.state.planType = "lifetime";
-          account.state.hearts = 5;
-          account.state.subscriptionDate = new Date().toISOString().split("T")[0];
-        } else {
-          // Create a new account with lifetime premium already active
-          const displayUsername = email.includes("@") ? email.split("@")[0] : email;
-          const preState: UserState = {
-            ...DEFAULT_STATE,
-            email: cleanEmail,
-            fullName: displayUsername,
-            isPremium: true,
-            planType: "lifetime",
-            hearts: 5,
-            subscriptionDate: new Date().toISOString().split("T")[0]
-          };
-          
-          account = {
-            email: cleanEmail,
-            fullName: displayUsername,
-            passwordHash: password,
-            state: preState
-          };
-          
-          accounts.push(account);
-          saveRegisteredAccounts(accounts);
-        }
+        const premiumState: UserState = {
+          ...userState,
+          email: email.trim().toLowerCase(),
+          fullName: displayName,
+          isPremium: true,
+          planType: "lifetime",
+          hearts: 5,
+          subscriptionDate: new Date().toISOString().split("T")[0]
+        };
+        onUpdateState(premiumState);
+        setSuccess(`خوش‌آمدید، دکتر ${displayName}! حساب طلایی (Premium) شما فعال شد.`);
       } else {
-        // Standard registered account check
-        account = accounts.find(
-          acc => acc.email.toLowerCase() === email.toLowerCase() && acc.passwordHash === password
-        );
+        // Load whatever state is in the DB through the main auth handler, but let's notify the user
+        setSuccess(`خوش‌آمدید، دکتر ${displayName}!`);
       }
 
-      if (!account) {
-        setError("ایمیل یا کلمه عبور وارد شده اشتباه است.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Load this user's state
-      onUpdateState({
-        ...account.state,
-        email: account.email,
-        fullName: account.fullName,
-      });
-
-      setIsLoading(false);
-      setSuccess(`خوش‌آمدید، دکتر ${account.fullName}! حساب طلایی (Premium) شما فعال شد.`);
-      
       setTimeout(() => {
         onClose();
       }, 1500);
-    }, 1000);
+    } catch (e: any) {
+      console.error("Firebase email/password login failed:", e);
+      if (e.code === "auth/user-not-found" || e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+        setError("ایمیل یا کلمه عبور وارد شده اشتباه است.");
+      } else {
+        setError("ورود با خطا مواجه شد. لطفاً دوباره تلاش کنید.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleForgot = (e: React.FormEvent) => {
+  const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -240,17 +257,22 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const accounts = getRegisteredAccounts();
-      const exists = accounts.some(acc => acc.email.toLowerCase() === email.toLowerCase());
-
-      setIsLoading(false);
-      if (exists) {
-        setSuccess("ایمیل بازنشانی کلمه عبور ارسال شد (در محیط دمو رمز شما شبیه‌سازی گردید).");
-      } else {
+    try {
+      // Send real password reset email using Firebase Auth
+      await sendPasswordResetEmail(auth, email.trim());
+      setSuccess("ایمیل بازنشانی کلمه عبور با موفقیت ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید.");
+    } catch (e: any) {
+      console.error("Firebase sendPasswordResetEmail failed:", e);
+      if (e.code === "auth/user-not-found") {
         setError("حسابی با این ایمیل یافت نشد.");
+      } else if (e.code === "auth/invalid-email") {
+        setError("فرمت ایمیل وارد شده نامعتبر است.");
+      } else {
+        setError("ارسال ایمیل بازنشانی با خطا مواجه شد. لطفاً دوباره تلاش کنید.");
       }
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
