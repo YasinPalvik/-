@@ -71,7 +71,19 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
       }, 1500);
     } catch (e: any) {
       console.error("Google Sign-In failed", e);
-      setError("اتصال به حساب گوگل با خطا مواجه شد.");
+      if (e.code === "auth/operation-not-allowed") {
+        setError("روش ورود با گوگل در پروژه فایربیس فعال نیست. لطفاً آن را در کنسول Firebase > Authentication > Sign-in method فعال کنید.");
+      } else if (e.code === "auth/popup-blocked") {
+        setError("مرورگر پاپ‌آپ گوگل را مسدود کرده است. لطفاً از نوار آدرس دسترسی پاپ‌آپ را آزاد کرده یا برنامه را در یک 'تب جدید' باز کنید.");
+      } else if (e.code === "auth/cancelled-popup-request") {
+        setError("درخواست ورود با گوگل به دلیل بسته‌شدن پنجره پاپ‌آپ توسط شما لغو شد.");
+      } else if (e.code === "auth/auth-domain-config-required") {
+        setError("پیکربندی دامنه مجاز (Authorized Domain) فایربیس ناقص است. لطفاً دامنه فعلی برنامه را در کنسول فایربیس ثبت کنید.");
+      } else if (e.message && e.message.includes("iframe")) {
+        setError("خطای امنیتی مرورگر (Iframe Blocked). لطفاً روی دکمه بالای صفحه کلیک کنید و برنامه را در 'یک تب جدید' باز کرده و سپس تلاش کنید.");
+      } else {
+        setError(`خطا در اتصال به گوگل: ${e.message || "خطای ناشناخته فایربیس"}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -165,14 +177,18 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
       }, 1500);
     } catch (e: any) {
       console.error("Firebase email/password signup failed:", e);
-      if (e.code === "auth/email-already-in-use") {
+      if (e.code === "auth/operation-not-allowed") {
+        setError("روش ثبت‌نام با ایمیل و کلمه عبور در فایربیس شما غیرفعال است. لطفاً به کنسول Firebase > Authentication > Sign-in method بروید و گزینه Email/Password را فعال کنید.");
+      } else if (e.code === "auth/email-already-in-use") {
         setError("این ایمیل قبلاً ثبت‌نام شده است.");
       } else if (e.code === "auth/weak-password") {
         setError("کلمه عبور بسیار ضعیف است. باید حداقل ۶ کاراکتر باشد.");
       } else if (e.code === "auth/invalid-email") {
         setError("فرمت ایمیل وارد شده نامعتبر است.");
+      } else if (e.code === "auth/network-request-failed") {
+        setError("خطای شبکه! لطفاً اتصال اینترنت خود یا پروکسی/فیلترشکن را بررسی کنید و دوباره تلاش کنید.");
       } else {
-        setError("ثبت‌نام با خطا مواجه شد. لطفاً دوباره تلاش کنید.");
+        setError(`ثبت‌نام با خطا مواجه شد: ${e.message || "لطفاً دوباره تلاش کنید."}`);
       }
     } finally {
       setIsLoading(false);
@@ -297,6 +313,19 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
             <p className="text-[10px] text-slate-400">ذخیره خودکار پیشرفت، آنالیز زنده و ارتقا به بخش طلایی</p>
           </div>
         </div>
+
+        {/* Iframe warning callout */}
+        {typeof window !== "undefined" && window.self !== window.top && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-100 text-amber-800 text-[10px] rounded-2xl leading-relaxed space-y-1 text-right">
+            <div className="font-extrabold flex items-center gap-1.5 text-amber-950">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+              <span>نکته مهم برای تست ثبت‌نام و ورود با گوگل</span>
+            </div>
+            <p>
+              به دلیل محدودیت‌های امنیتی پیشرفته مرورگرها در داخل فریم (Iframe)، برای عملکرد صحیح **ثبت‌نام، تاییدیه ایمیل و پاپ‌آپ گوگل**، لطفاً اپلیکیشن را از طریق <strong className="text-amber-900 font-black">دکمه بالا سمت راست (تب جدید)</strong> باز کرده و در صفحه مستقل استفاده کنید.
+            </p>
+          </div>
+        )}
 
         {/* Native Google Sign-In Button */}
         {mode !== "forgot" && (
