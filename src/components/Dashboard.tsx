@@ -21,10 +21,25 @@ import {
   CheckCircle,
   TrendingUp,
   Award as AwardIcon,
-  Check
+  Check,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import KnowledgeMap from "./KnowledgeMap";
+import Tilt3D from "./Tilt3D";
+
+// Premium 3D Rendered assets from Microsoft Fluent UI Emoji (completely free & open-source)
+const chapter3DAssets = [
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Brain/3D/brain_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Stethoscope/3D/stethoscope_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/DNA/3D/dna_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Medical%20symbol/3D/medical_symbol_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pills/3D/pills_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Syringe/3D/syringe_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shield/3D/shield_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Books/3D/books_3d.png",
+  "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Trophy/3D/trophy_3d.png",
+];
 
 interface DashboardProps {
   userState: UserState;
@@ -34,115 +49,97 @@ interface DashboardProps {
   onTriggerPremium: () => void;
 }
 
-// Duolingo style color themes for each chapter index
+// Creative medical-tech glowing color themes for Bento layout
 const chapterThemes = [
   {
-    bg: "bg-emerald-500",
-    border: "border-emerald-600",
-    hoverBg: "hover:bg-emerald-400",
-    shadow: "border-emerald-700",
-    lightBg: "bg-emerald-50",
-    textColor: "text-emerald-700",
-    headingColor: "text-emerald-800",
-    badge: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    progressBar: "bg-emerald-500",
-    glow: "shadow-emerald-500/20"
+    bg: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
+    border: "border-cyan-500/20",
+    hoverBg: "hover:bg-cyan-500/20",
+    shadow: "shadow-cyan-500/10",
+    progressBar: "bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.5)]",
+    glow: "shadow-cyan-500/20",
+    badge: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+    iconColor: "text-cyan-400"
   },
   {
-    bg: "bg-blue-500",
-    border: "border-blue-600",
-    hoverBg: "hover:bg-blue-400",
-    shadow: "border-blue-700",
-    lightBg: "bg-blue-50",
-    textColor: "text-blue-700",
-    headingColor: "text-blue-800",
-    badge: "bg-blue-100 text-blue-800 border-blue-200",
-    progressBar: "bg-blue-500",
-    glow: "shadow-blue-500/20"
+    bg: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
+    border: "border-indigo-500/20",
+    hoverBg: "hover:bg-indigo-500/20",
+    shadow: "shadow-indigo-500/10",
+    progressBar: "bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]",
+    glow: "shadow-indigo-500/20",
+    badge: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
+    iconColor: "text-indigo-400"
   },
   {
-    bg: "bg-purple-500",
-    border: "border-purple-600",
-    hoverBg: "hover:bg-purple-400",
-    shadow: "border-purple-700",
-    lightBg: "bg-purple-50",
-    textColor: "text-purple-700",
-    headingColor: "text-purple-800",
-    badge: "bg-purple-100 text-purple-800 border-purple-200",
-    progressBar: "bg-purple-500",
-    glow: "shadow-purple-500/20"
+    bg: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+    border: "border-emerald-500/20",
+    hoverBg: "hover:bg-emerald-500/20",
+    shadow: "shadow-emerald-500/10",
+    progressBar: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]",
+    glow: "shadow-emerald-500/20",
+    badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    iconColor: "text-emerald-400"
   },
   {
-    bg: "bg-orange-500",
-    border: "border-orange-600",
-    hoverBg: "hover:bg-orange-400",
-    shadow: "border-orange-700",
-    lightBg: "bg-orange-50",
-    textColor: "text-orange-700",
-    headingColor: "text-orange-800",
-    badge: "bg-orange-100 text-orange-800 border-orange-200",
-    progressBar: "bg-orange-500",
-    glow: "shadow-orange-500/20"
+    bg: "bg-pink-500/10 border-pink-500/20 text-pink-400",
+    border: "border-pink-500/20",
+    hoverBg: "hover:bg-pink-500/20",
+    shadow: "shadow-pink-500/10",
+    progressBar: "bg-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.5)]",
+    glow: "shadow-pink-500/20",
+    badge: "bg-pink-500/15 text-pink-300 border-pink-500/30",
+    iconColor: "text-pink-400"
   },
   {
-    bg: "bg-rose-500",
-    border: "border-rose-600",
-    hoverBg: "hover:bg-rose-400",
-    shadow: "border-rose-700",
-    lightBg: "bg-rose-50",
-    textColor: "text-rose-700",
-    headingColor: "text-rose-800",
-    badge: "bg-rose-100 text-rose-800 border-rose-200",
-    progressBar: "bg-rose-500",
-    glow: "shadow-rose-500/20"
+    bg: "bg-amber-500/10 border-amber-500/20 text-amber-400",
+    border: "border-amber-500/20",
+    hoverBg: "hover:bg-amber-500/20",
+    shadow: "shadow-amber-500/10",
+    progressBar: "bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.5)]",
+    glow: "shadow-amber-500/20",
+    badge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    iconColor: "text-amber-400"
   },
   {
-    bg: "bg-amber-500",
-    border: "border-amber-600",
-    hoverBg: "hover:bg-amber-400",
-    shadow: "border-amber-700",
-    lightBg: "bg-amber-50",
-    textColor: "text-amber-700",
-    headingColor: "text-amber-800",
-    badge: "bg-amber-100 text-amber-800 border-amber-200",
-    progressBar: "bg-amber-500",
-    glow: "shadow-amber-500/20"
+    bg: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+    border: "border-purple-500/20",
+    hoverBg: "hover:bg-purple-500/20",
+    shadow: "shadow-purple-500/10",
+    progressBar: "bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]",
+    glow: "shadow-purple-500/20",
+    badge: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+    iconColor: "text-purple-400"
   },
   {
-    bg: "bg-teal-500",
-    border: "border-teal-600",
-    hoverBg: "hover:bg-teal-400",
-    shadow: "border-teal-700",
-    lightBg: "bg-teal-50",
-    textColor: "text-teal-700",
-    headingColor: "text-teal-800",
-    badge: "bg-teal-100 text-teal-800 border-teal-200",
-    progressBar: "bg-teal-500",
-    glow: "shadow-teal-500/20"
+    bg: "bg-teal-500/10 border-teal-500/20 text-teal-400",
+    border: "border-teal-500/20",
+    hoverBg: "hover:bg-teal-500/20",
+    shadow: "shadow-teal-500/10",
+    progressBar: "bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.5)]",
+    glow: "shadow-teal-500/20",
+    badge: "bg-teal-500/15 text-teal-300 border-teal-500/30",
+    iconColor: "text-teal-400"
   },
   {
-    bg: "bg-indigo-500",
-    border: "border-indigo-600",
-    hoverBg: "hover:bg-indigo-400",
-    shadow: "border-indigo-700",
-    lightBg: "bg-indigo-50",
-    textColor: "text-indigo-700",
-    headingColor: "text-indigo-800",
-    badge: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    progressBar: "bg-indigo-500",
-    glow: "shadow-indigo-500/20"
+    bg: "bg-sky-500/10 border-sky-500/20 text-sky-400",
+    border: "border-sky-500/20",
+    hoverBg: "hover:bg-sky-500/20",
+    shadow: "shadow-sky-500/10",
+    progressBar: "bg-sky-400 shadow-[0_0_10px_rgba(14,165,233,0.5)]",
+    glow: "shadow-sky-500/20",
+    badge: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+    iconColor: "text-sky-400"
   },
   {
-    bg: "bg-sky-500",
-    border: "border-sky-600",
-    hoverBg: "hover:bg-sky-400",
-    shadow: "border-sky-700",
-    lightBg: "bg-sky-50",
-    textColor: "text-sky-700",
-    headingColor: "text-sky-800",
-    badge: "bg-sky-100 text-sky-800 border-sky-200",
-    progressBar: "bg-sky-500",
-    glow: "shadow-sky-500/20"
+    bg: "bg-rose-500/10 border-rose-500/20 text-rose-400",
+    border: "border-rose-500/20",
+    hoverBg: "hover:bg-rose-500/20",
+    shadow: "shadow-rose-500/10",
+    progressBar: "bg-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.5)]",
+    glow: "shadow-rose-500/20",
+    badge: "bg-rose-500/15 text-rose-300 border-rose-500/30",
+    iconColor: "text-rose-400"
   }
 ];
 
@@ -171,17 +168,14 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
     };
   }, [userState.xp]);
 
-  // Check if a chapter is unlocked
   const isChapterUnlocked = (chapterId: string, idx: number) => {
     if (idx === 0) return true;
     return userState.unlockedChapters.includes(chapterId);
   };
 
-  // Get total completed concepts
   const completedConceptsCount = userState.completedConcepts.length;
   const totalConceptsCount = concepts.length;
 
-  // Check if concept is unlocked based on prerequisites & chapter unlocking
   const isConceptUnlocked = (conceptId: string) => {
     const concept = concepts.find(c => c.id === conceptId);
     if (!concept) return false;
@@ -189,24 +183,22 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
     const chapterIdx = chapters.findIndex(ch => ch.id === concept.chapterId);
     if (!isChapterUnlocked(concept.chapterId, chapterIdx)) return false;
 
-    // Prerequisites met
     return concept.prerequisites.every((pid) =>
       userState.completedConcepts.includes(pid)
     );
   };
 
-  // Process leaderboard from fetched DB users
   const processedLeaderboard = leaderboardData.map((surgeon, sIdx) => {
     const isCurrentUser = currentUser?.uid === surgeon.uid || (userState.email && userState.email === surgeon.email);
     
     const colors = [
-      "bg-amber-100 text-amber-600",
-      "bg-blue-100 text-blue-600",
-      "bg-purple-100 text-purple-600",
-      "bg-rose-100 text-rose-600",
-      "bg-emerald-100 text-emerald-600"
+      "bg-amber-500/20 text-amber-300 border border-amber-500/30",
+      "bg-blue-500/20 text-blue-300 border border-blue-500/30",
+      "bg-purple-500/20 text-purple-300 border border-purple-500/30",
+      "bg-rose-500/20 text-rose-300 border border-rose-500/30",
+      "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
     ];
-    const avatarColor = isCurrentUser ? "bg-indigo-600 text-white" : (colors[sIdx % colors.length]);
+    const avatarColor = isCurrentUser ? "bg-indigo-600 text-white border border-indigo-400" : (colors[sIdx % colors.length]);
 
     return {
       rank: sIdx + 1,
@@ -217,7 +209,6 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
     };
   });
 
-  // Weekly streak calendar
   const daysOfWeek = [
     { name: "ش", active: userState.dailyStreak > 0, isToday: true },
     { name: "ی", active: false, isToday: false },
@@ -231,638 +222,684 @@ export default function Dashboard({ userState, currentUser, onStartLesson, onNav
   return (
     <div className="space-y-8" dir="rtl">
       
-      {/* Playful Duolingo-style Stats Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* ----------------- ASYMMETRICAL BENTO GRID SYSTEM ----------------- */}
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 auto-rows-auto">
         
-        {/* Streak card with Duolingo-style 3D Button look */}
-        <div className="bg-white border-2 border-b-6 border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-2xs transition-all hover:translate-y-[-2px] hover:border-b-8">
-          <div className="space-y-1 text-right">
-            <p className="text-[11px] text-slate-400 font-extrabold uppercase tracking-wide">تداوم مطالعه (Streak)</p>
-            <h3 className="text-2xl font-black text-orange-500 font-mono flex items-baseline gap-1">
-              {userState.dailyStreak} <span className="text-xs font-extrabold text-orange-600">روز</span>
-            </h3>
-          </div>
-          <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center border border-orange-100">
-            <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" />
-          </div>
-        </div>
-
-        {/* XP card */}
-        <div className="bg-white border-2 border-b-6 border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-2xs transition-all hover:translate-y-[-2px] hover:border-b-8">
-          <div className="space-y-1 text-right">
-            <p className="text-[11px] text-slate-400 font-extrabold uppercase tracking-wide">امتیاز تجربه (XP)</p>
-            <h3 className="text-2xl font-black text-blue-500 font-mono flex items-baseline gap-1">
-              {userState.xp} <span className="text-xs font-extrabold text-blue-600">XP</span>
-            </h3>
-          </div>
-          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center border border-blue-100">
-            <Zap className="w-6 h-6 text-blue-500 fill-blue-500" />
-          </div>
-        </div>
-
-        {/* Diagnosis streak */}
-        <div className="bg-white border-2 border-b-6 border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-2xs transition-all hover:translate-y-[-2px] hover:border-b-8">
-          <div className="space-y-1 text-right">
-            <p className="text-[11px] text-slate-400 font-extrabold uppercase tracking-wide">تشخیص پی‌در‌پی</p>
-            <h3 className="text-2xl font-black text-emerald-500 font-mono flex items-baseline gap-1">
-              {userState.diagnosisStreak} <span className="text-xs font-extrabold text-emerald-600">کیس</span>
-            </h3>
-          </div>
-          <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-100">
-            <Award className="w-6 h-6 text-emerald-500 fill-emerald-50" />
-          </div>
-        </div>
-
-        {/* Remaining hearts */}
-        <div className="bg-white border-2 border-b-6 border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-2xs transition-all hover:translate-y-[-2px] hover:border-b-8">
-          <div className="space-y-1 text-right">
-            <p className="text-[11px] text-slate-400 font-extrabold uppercase tracking-wide">جان‌های بالینی</p>
-            <div className="flex items-center gap-1 font-mono">
-              {userState.isPremium ? (
-                <span className="text-xl font-black text-rose-500">∞</span>
-              ) : (
-                [...Array(5)].map((_, i) => (
-                  <Heart
-                    key={i}
-                    className={`w-3.5 h-3.5 ${
-                      i < userState.hearts
-                        ? "text-rose-500 fill-rose-500"
-                        : "text-slate-200"
-                    }`}
-                  />
-                ))
-              )}
+        {/* Bento Stat Card 1: Study Streak with 3D interactive tilt */}
+        <Tilt3D className="lg:col-span-3 md:col-span-2">
+          <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-orange-500/40 group h-full relative overflow-hidden">
+            <div className="space-y-1 text-right">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">تداوم مطالعه (Streak)</p>
+              <h3 className="text-3xl font-black text-orange-500 font-mono flex items-baseline gap-1">
+                {userState.dailyStreak} <span className="text-xs font-extrabold text-orange-400">روز</span>
+              </h3>
+              <p className="text-[9px] text-slate-500">حضور فعال روزانه در بخش جراحی</p>
             </div>
-            <p className="text-[10px] text-rose-600 font-bold">
-              {userState.isPremium ? "حساب طلایی نامحدود" : userState.hearts === 0 ? "جان تمام شده! مرور کن" : `${userState.hearts} از ۵ جان`}
-            </p>
+            <div className="w-14 h-14 relative shrink-0">
+              <img 
+                src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Fire/3D/fire_3d.png" 
+                alt="Streak 3D"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(249,115,22,0.3)] group-hover:scale-115 transition-transform duration-300"
+              />
+            </div>
           </div>
-          <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center border border-rose-100">
-            <Heart className={`w-6 h-6 ${userState.hearts === 0 && !userState.isPremium ? "text-slate-300" : "text-rose-500 fill-rose-500"}`} />
+        </Tilt3D>
+
+        {/* Bento Stat Card 2: XP Points with 3D interactive tilt */}
+        <Tilt3D className="lg:col-span-3 md:col-span-2">
+          <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-blue-500/40 group h-full relative overflow-hidden">
+            <div className="space-y-1 text-right">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">امتیاز تجربه (XP)</p>
+              <h3 className="text-3xl font-black text-blue-400 font-mono flex items-baseline gap-1">
+                {userState.xp} <span className="text-xs font-extrabold text-blue-400">XP</span>
+              </h3>
+              <p className="text-[9px] text-slate-500">مجموع امتیاز یادگیری پرونده</p>
+            </div>
+            <div className="w-14 h-14 relative shrink-0">
+              <img 
+                src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/High%20voltage/3D/high_voltage_3d.png" 
+                alt="XP 3D"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(59,130,246,0.3)] group-hover:scale-115 transition-transform duration-300"
+              />
+            </div>
           </div>
-        </div>
+        </Tilt3D>
 
-      </div>
+        {/* Bento Stat Card 3: Diagnosis Streak with 3D interactive tilt */}
+        <Tilt3D className="lg:col-span-3 md:col-span-2">
+          <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-emerald-500/40 group h-full relative overflow-hidden">
+            <div className="space-y-1 text-right">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">تشخیص پی‌در‌پی</p>
+              <h3 className="text-3xl font-black text-emerald-400 font-mono flex items-baseline gap-1">
+                {userState.diagnosisStreak} <span className="text-xs font-extrabold text-emerald-400">کیس</span>
+              </h3>
+              <p className="text-[9px] text-slate-500">پاسخ‌های بدون خطای متوالی</p>
+            </div>
+            <div className="w-14 h-14 relative shrink-0">
+              <img 
+                src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Trophy/3D/trophy_3d.png" 
+                alt="Diagnosis 3D"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(16,185,129,0.3)] group-hover:scale-115 transition-transform duration-300 animate-pulse"
+                style={{ animationDuration: "3s" }}
+              />
+            </div>
+          </div>
+        </Tilt3D>
 
-      {/* Main Grid: Learning Path Map (Left) & Sidebar Gamification (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column: Playful Duolingo Serpent Map */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          <div className="bg-white border-2 border-b-6 border-slate-200 p-6 md:p-8 rounded-[32px] shadow-xs space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div className="text-right">
-                <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                  <BookMarked className="w-5 h-5 text-blue-500" />
-                  نقشه یادگیری و مسیر جراحی بالینی
-                </h2>
-                <p className="text-xs text-slate-400 font-medium">
-                  روی گره‌های دایره‌ای کلیک کنید تا جزئیات مبحث باز شود. مسیر را کامل کنید!
-                </p>
+        {/* Bento Stat Card 4: Clinical Hearts with 3D interactive tilt */}
+        <Tilt3D className="lg:col-span-3 md:col-span-2">
+          <div className="bg-slate-900/40 border border-white/[0.08] backdrop-blur-xl p-5 rounded-3xl flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:border-rose-500/40 group h-full relative overflow-hidden">
+            <div className="space-y-1 text-right">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">جان‌های بالینی</p>
+              <div className="flex items-center gap-1 font-mono pt-1">
+                {userState.isPremium ? (
+                  <span className="text-2xl font-black text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]">∞</span>
+                ) : (
+                  [...Array(5)].map((_, i) => (
+                    <Heart
+                      key={i}
+                      className={`w-3.5 h-3.5 ${
+                        i < userState.hearts
+                          ? "text-rose-500 fill-rose-500 drop-shadow-[0_0_5px_rgba(244,63,94,0.3)]"
+                          : "text-slate-700"
+                      }`}
+                    />
+                  ))
+                )}
               </div>
+              <p className="text-[9px] text-slate-500 pt-1">
+                {userState.isPremium ? "عضویت طلایی و ظرفیت بی‌نهایت" : userState.hearts === 0 ? "جان تمام شده! مرور جراحی کن" : `ظرفیت فعال: ${userState.hearts} از ۵`}
+              </p>
+            </div>
+            <div className="w-14 h-14 relative shrink-0">
+              <img 
+                src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Red%20heart/3D/red_heart_3d.png" 
+                alt="Hearts 3D"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(244,63,94,0.3)] group-hover:scale-115 transition-transform duration-300"
+              />
+            </div>
+          </div>
+        </Tilt3D>
 
-              {/* Progress counter */}
-              <div className="text-left text-xs bg-slate-50 border border-slate-200 text-slate-500 px-3 py-1.5 rounded-xl font-mono font-extrabold shrink-0">
-                تسلط: {completedConceptsCount} / {totalConceptsCount} گره
-              </div>
+        {/* Bento Central Block (Large): Learning Path & Serpent Map (Cruip layout structured, Arjun visual style) */}
+        <motion.div 
+          className="lg:col-span-8 md:col-span-4 bg-slate-900/30 border border-white/[0.06] backdrop-blur-xl p-6 md:p-8 rounded-[32px] shadow-[0_12px_40px_rgba(0,0,0,0.4)] flex flex-col justify-between space-y-6"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-white/5 gap-3">
+            <div className="text-right">
+              <h2 className="text-base font-black text-white flex items-center gap-2">
+                <BookMarked className="w-5 h-5 text-indigo-400" />
+                نقشه مطالعاتی و مسیر جراحی بالینی
+              </h2>
+              <p className="text-[11px] text-slate-400 font-medium">
+                برای باز کردن و دسترسی به مفاهیم تعاملی جراحی، روی گره‌های دایره‌ای کلیک کنید.
+              </p>
             </div>
 
-            {/* Path Serpentine Units Flow */}
-            <div className="space-y-12">
-              {chapters.map((chapter, index) => {
-                const unlocked = isChapterUnlocked(chapter.id, index);
-                const progress = userState.chapterProgress[chapter.id] || 0;
-                const theme = chapterThemes[index % chapterThemes.length];
-                
-                // Fetch concepts for this specific unit
-                const chConcepts = concepts.filter(c => c.chapterId === chapter.id);
+            <div className="text-left text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-3 py-1.5 rounded-xl font-mono font-extrabold shrink-0 w-max">
+              تسلط کل: {completedConceptsCount} / {totalConceptsCount} مفهوم
+            </div>
+          </div>
 
-                return (
-                  <div
-                    key={chapter.id}
-                    className={`relative space-y-8 ${!unlocked && "opacity-60 select-none"}`}
-                  >
-                    {/* Unit Box Header (Duolingo Style) */}
-                    <div className={`rounded-2xl border-2 border-b-6 ${theme.border} ${theme.shadow} ${unlocked ? theme.bg : "bg-slate-300 border-slate-400"} text-white p-5 shadow-xs relative overflow-hidden transition-all duration-300`}>
-                      <div className="absolute right-0 bottom-0 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+          {/* Interactive Serpentine Unit Roadmap */}
+          <div className="space-y-12">
+            {chapters.map((chapter, index) => {
+              const unlocked = isChapterUnlocked(chapter.id, index);
+              const progress = userState.chapterProgress[chapter.id] || 0;
+              const theme = chapterThemes[index % chapterThemes.length];
+              const chConcepts = concepts.filter(c => c.chapterId === chapter.id);
+
+              return (
+                <div key={chapter.id} className={`relative space-y-6 ${!unlocked && "opacity-40 select-none"}`}>
+                  
+                  {/* Chapter Section Card with 3D interactive tilt and floating 3D illustration */}
+                  <Tilt3D scale={1.01} maxRotation={5}>
+                    <div className={`p-5 rounded-2xl border ${unlocked ? "bg-slate-900/60 border-white/10 hover:border-indigo-500/30" : "bg-slate-950/20 border-white/5"} relative overflow-hidden group transition-all duration-300 h-full`}>
+                      <div className="absolute left-16 bottom-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors"></div>
                       
-                      <div className="flex justify-between items-center relative z-10">
-                        <div className="text-right space-y-1">
-                          <span className="bg-white/20 border border-white/25 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                      <div className="flex justify-between items-center relative z-10 gap-4">
+                        <div className="text-right space-y-1.5 flex-1 min-w-0">
+                          <span className={`inline-block text-[9px] font-black px-2 py-0.5 rounded-full border ${theme.badge}`}>
                             بخش {index + 1}
                           </span>
-                          <h3 className="text-base font-black text-white">{chapter.title}</h3>
-                          <p className="text-xs text-white/80 leading-relaxed font-sans font-medium">{chapter.description}</p>
+                          <h3 className="text-sm font-black text-slate-100">{chapter.title}</h3>
+                          <p className="text-[11px] text-slate-400 leading-relaxed max-w-md">{chapter.description}</p>
                         </div>
 
-                        {/* Round Progress indicator */}
-                        <div className="bg-white/10 border border-white/15 w-16 h-16 rounded-full flex flex-col items-center justify-center font-mono shrink-0">
-                          <span className="text-xs font-black">{progress}%</span>
-                          <span className="text-[8px] uppercase tracking-wide opacity-80">تکمیل</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Serpent Concept Nodes connected by a vertical dotted pipeline */}
-                    {unlocked && (
-                      <div className="relative py-4 flex flex-col items-center">
-                        {/* Connecting track line */}
-                        <div className="w-1 bg-slate-200 absolute top-0 bottom-0 left-1/2 -translate-x-1/2 -z-0 pointer-events-none"></div>
-
-                        <div className="space-y-8 w-full relative z-10">
-                          {chConcepts.map((concept, cIdx) => {
-                            const isLearned = userState.completedConcepts.includes(concept.id);
-                            const activeNode = isConceptUnlocked(concept.id) && !isLearned;
-                            const isLocked = !isConceptUnlocked(concept.id);
-                            
-                            // Determine horizontal offset for Duolingo serpentine layout
-                            const offsetMod = cIdx % 4;
-                            let alignmentClass = "justify-center";
-                            let translateStyle = "";
-                            
-                            if (offsetMod === 1) {
-                              translateStyle = "-translate-x-12 sm:-translate-x-24";
-                            } else if (offsetMod === 3) {
-                              translateStyle = "translate-x-12 sm:translate-x-24";
-                            }
-
-                            return (
-                              <div 
-                                key={concept.id} 
-                                className={`flex ${alignmentClass} w-full transition-all duration-300 ${translateStyle}`}
-                              >
-                                <div className="relative group">
-                                  {/* Active node pulsating background effect */}
-                                  {activeNode && (
-                                    <span className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping -z-10 scale-125"></span>
-                                  )}
-
-                                  {/* Playful circle button */}
-                                  <button
-                                    onClick={() => setSelectedConcept({ ...concept, chapterIdx: index })}
-                                    className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex flex-col items-center justify-center transition-all duration-150 relative border-2 ${
-                                      isLearned
-                                        ? `bg-emerald-500 border-emerald-600 border-b-[6px] md:border-b-[8px] ${theme.shadow} text-white hover:brightness-110 active:border-b-2 active:translate-y-1`
-                                        : isLocked
-                                        ? "bg-slate-200 border-slate-300 border-b-[6px] md:border-b-[8px] text-slate-400 cursor-not-allowed"
-                                        : `bg-blue-500 border-blue-600 border-b-[6px] md:border-b-[8px] border-b-blue-700 text-white hover:scale-105 active:border-b-2 active:translate-y-1`
-                                    }`}
-                                  >
-                                    {isLearned ? (
-                                      <CheckCircle className="w-6 h-6 text-white fill-emerald-600" />
-                                    ) : isLocked ? (
-                                      <Lock className="w-5 h-5" />
-                                    ) : (
-                                      <Play className="w-5 h-5 fill-white text-white translate-x-[-1px]" />
-                                    )}
-
-                                    {/* Mini badge count */}
-                                    <span className="absolute -bottom-1 -right-1 bg-slate-800 text-white border border-slate-700 font-mono font-bold text-[8px] w-5 h-5 rounded-full flex items-center justify-center">
-                                      {cIdx + 1}
-                                    </span>
-                                  </button>
-
-                                  {/* Tooltip pointing active */}
-                                  {activeNode && (
-                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-md animate-bounce pointer-events-none whitespace-nowrap">
-                                      شروع کنید!
-                                      <div className="w-2 h-2 bg-blue-600 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"></div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {!unlocked && (
-                      <div className="py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-slate-400 flex flex-col items-center justify-center gap-2">
-                        <Lock className="w-6 h-6 text-slate-300" />
-                        <p className="text-xs font-extrabold">این بخش قفل است</p>
-                        <p className="text-[10px] text-slate-400 leading-relaxed">بخش‌های قبلی را کامل کنید تا قفل این بخش به‌طور خودکار باز شود.</p>
-                      </div>
-                    )}
-
-                  </div>
-                );
-              })}
-            </div>
-
-          </div>
-
-          {/* Interactive Concept popover Modal (Centered modal with backdrop blur, Duolingo & Trophy UI style) */}
-          <AnimatePresence>
-            {selectedConcept && (() => {
-              const isLearned = userState.completedConcepts.includes(selectedConcept.id);
-              const chIdx = selectedConcept.chapterIdx;
-              const chapter = chapters[chIdx];
-              const isChUnlocked = isChapterUnlocked(chapter.id, chIdx);
-              const isUnlocked = isChUnlocked && selectedConcept.prerequisites.every((pid: string) =>
-                userState.completedConcepts.includes(pid)
-              );
-              
-              return (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 text-right"
-                  dir="rtl"
-                >
-                  <motion.div
-                    initial={{ scale: 0.9, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0.9, y: 20 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 350 }}
-                    className="bg-white border-2 border-b-8 border-slate-300 rounded-[32px] max-w-md w-full p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl"
-                  >
-                    {/* Top background graphic */}
-                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-                    
-                    {/* Close Button */}
-                    <button
-                      onClick={() => setSelectedConcept(null)}
-                      className="absolute left-6 top-6 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-xl transition-all"
-                    >
-                      <XIcon className="w-5 h-5" />
-                    </button>
-
-                    <div className="space-y-4">
-                      {/* Badge / Status Indicator */}
-                      <div className="flex items-center gap-2">
-                        {isLearned ? (
-                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wide flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 fill-emerald-50" />
-                            مبحث تسلط یافته
-                          </span>
-                        ) : isUnlocked ? (
-                          <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-2.5 py-1 rounded-lg border border-blue-200 uppercase tracking-wide flex items-center gap-1">
-                            <Sparkles className="w-3.5 h-3.5 text-blue-600 fill-blue-50" />
-                            آماده شروع آموزش
-                          </span>
-                        ) : (
-                          <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-2.5 py-1 rounded-lg border border-slate-200 uppercase tracking-wide flex items-center gap-1">
-                            <Lock className="w-3.5 h-3.5 text-slate-500" />
-                            مبحث قفل شده
-                          </span>
-                        )}
-
-                        {selectedConcept.highStakes && (
-                          <span className="bg-rose-100 text-rose-800 text-[10px] font-black px-2.5 py-1 rounded-lg border border-rose-200 uppercase tracking-wide">
-                            پیامد بالینی پرخطر
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Title & Level */}
-                      <div className="space-y-1">
-                        <h3 className="text-xl font-black text-slate-800 leading-tight">
-                          {selectedConcept.title}
-                        </h3>
-                        <p className="text-xs text-slate-400 font-bold">
-                          سطح یادگیری ارزیابی: <span className="text-slate-600">{selectedConcept.bloomLevel}</span>
-                        </p>
-                      </div>
-
-                      {/* Content Box */}
-                      <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl relative">
-                        <h4 className="text-xs font-black text-slate-400 mb-2 uppercase tracking-wide">خلاصه مرجع علمی مبحث:</h4>
-                        <p className="text-xs text-slate-700 leading-relaxed font-sans font-medium">
-                          {selectedConcept.definition}
-                        </p>
-                      </div>
-
-                      {/* Prerequisites Requirement */}
-                      {selectedConcept.prerequisites && selectedConcept.prerequisites.length > 0 && (
-                        <div className="space-y-2">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wide">پیش‌نیازهای کلیدی مبحث:</h4>
-                          <div className="space-y-1.5">
-                            {selectedConcept.prerequisites.map((pid: string) => {
-                              const pre = concepts.find(c => c.id === pid);
-                              const completedPre = userState.completedConcepts.includes(pid);
-                              return (
-                                <div key={pid} className="flex items-center justify-between bg-slate-50/50 p-2 rounded-xl border border-slate-100 text-xs">
-                                  <span className="font-bold text-slate-700">{pre ? pre.title : pid}</span>
-                                  {completedPre ? (
-                                    <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                      <Check className="w-3 h-3" /> کامل شده
-                                    </span>
-                                  ) : (
-                                    <span className="text-[10px] font-black text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                      <Lock className="w-3 h-3" /> قفل
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })}
+                        {/* Floated 3D Icon corresponding to subject */}
+                        {unlocked && (
+                          <div className="w-12 h-12 relative shrink-0">
+                            <img 
+                              src={chapter3DAssets[index % chapter3DAssets.length]} 
+                              alt="Chapter 3D Icon"
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-contain filter drop-shadow-[0_6px_12px_rgba(99,102,241,0.25)] group-hover:scale-110 group-hover:rotate-12 transition-all duration-300"
+                            />
                           </div>
+                        )}
+
+                        <div className="flex flex-col items-center shrink-0">
+                          <div className="w-14 h-14 rounded-full bg-slate-950/80 border border-white/10 flex flex-col items-center justify-center font-mono relative">
+                            <span className="text-[10px] font-black text-indigo-300">{progress}%</span>
+                            <span className="text-[7px] text-slate-500 font-extrabold uppercase tracking-wide">تکمیل</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Progress slider bar */}
+                      {unlocked && (
+                        <div className="w-full h-1 bg-slate-950 rounded-full mt-4 overflow-hidden">
+                          <div 
+                            className={`h-full ${theme.progressBar} rounded-full transition-all duration-500`}
+                            style={{ width: `${progress}%` }}
+                          />
                         </div>
                       )}
-
-                      {/* Modal Actions */}
-                      <div className="flex flex-col gap-3 pt-2">
-                        {isUnlocked || isLearned ? (
-                          <button
-                            onClick={() => {
-                              setSelectedConcept(null);
-                              onStartLesson(chapter.id, false);
-                            }}
-                            className="w-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-500 text-white font-black text-xs py-3.5 rounded-2xl border-b-4 border-emerald-700 active:border-b-0 active:translate-y-[4px] transition-all flex items-center justify-center gap-2 shadow-sm"
-                          >
-                            <Play className="w-4 h-4 fill-white text-white" />
-                            <span>شروع آموزش تعاملی بخش مربوطه</span>
-                          </button>
-                        ) : (
-                          <div className="text-center p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-400 leading-relaxed">
-                            این مفهوم در حال حاضر <strong>قفل</strong> است. ابتدا باید بخش‌ها و مفاهیم پیش‌نیاز را کامل کنید تا دسترسی فعال شود.
-                          </div>
-                        )}
-                        
-                        <button
-                          onClick={() => setSelectedConcept(null)}
-                          className="w-full bg-white hover:bg-slate-50 text-slate-600 font-bold text-xs py-3 rounded-2xl border-2 border-slate-200 transition-all text-center"
-                        >
-                          بستن جزئیات
-                        </button>
-                      </div>
-
                     </div>
-                  </motion.div>
-                </motion.div>
-              );
-            })()}
-          </AnimatePresence>
+                  </Tilt3D>
 
-        </div>
+                  {/* Serpent Concept Circle Nodes (RTL aligned connected line) */}
+                  {unlocked && (
+                    <div className="relative py-4 flex flex-col items-center">
+                      <div className="w-[2px] bg-slate-800/80 absolute top-0 bottom-0 left-1/2 -translate-x-1/2 -z-0" />
 
-        {/* Right Column: Trophy UI style Gamification Components */}
-        <div className="space-y-6">
-          
-          {/* 1. Daily Streak Calendar (Trophy UI Style) */}
-          <div className="bg-white border-2 border-b-6 border-slate-200 p-5 rounded-[28px] shadow-2xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="text-right">
-                <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-orange-500" />
-                  تقویم هفتگی تداوم (Streak)
-                </h3>
-                <p className="text-[10px] text-slate-400 font-bold">پزشکان فعال روزانه جوایز XP دوبرابر دارند</p>
-              </div>
-              <span className="bg-orange-50 text-orange-600 font-mono text-xs font-bold px-2 py-0.5 rounded-lg border border-orange-100">
-                {userState.dailyStreak} روز
-              </span>
-            </div>
+                      <div className="space-y-8 w-full relative z-10">
+                        {chConcepts.map((concept, cIdx) => {
+                          const isLearned = userState.completedConcepts.includes(concept.id);
+                          const activeNode = isConceptUnlocked(concept.id) && !isLearned;
+                          const isLocked = !isConceptUnlocked(concept.id);
+                          
+                          // Duolingo style zig-zag layout
+                          const offsetMod = cIdx % 4;
+                          let alignmentClass = "justify-center";
+                          let translateStyle = "";
+                          
+                          if (offsetMod === 1) {
+                            translateStyle = "-translate-x-12 sm:-translate-x-20";
+                          } else if (offsetMod === 3) {
+                            translateStyle = "translate-x-12 sm:translate-x-20";
+                          }
 
-            <div className="flex justify-between gap-1.5 pt-1">
-              {daysOfWeek.map((day, idx) => (
-                <div key={idx} className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                  <span className={`text-[10px] font-black ${day.isToday ? "text-blue-600" : "text-slate-400"}`}>
-                    {day.name}
-                  </span>
-                  
-                  {/* Playful Circle Streak Indicator */}
-                  <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
-                    day.active 
-                      ? "bg-gradient-to-tr from-orange-400 to-amber-400 border-orange-500 text-white shadow-xs shadow-orange-500/10"
-                      : day.isToday
-                      ? "bg-white border-blue-400 border-2 border-dashed text-blue-500"
-                      : "bg-slate-50 border-slate-200 text-slate-300"
-                  }`}>
-                    {day.active ? (
-                      <Flame className="w-4 h-4 text-white fill-white" />
-                    ) : (
-                      <span className="text-[9px] font-bold font-mono">
-                        {day.isToday ? "امروز" : ""}
-                      </span>
-                    )}
-                  </div>
+                          return (
+                            <div 
+                              key={concept.id} 
+                              className={`flex ${alignmentClass} w-full transition-all duration-300 ${translateStyle}`}
+                            >
+                              <div className="relative group">
+                                {activeNode && (
+                                  <span className="absolute inset-0 rounded-full bg-indigo-500/20 animate-ping -z-10 scale-125" />
+                                )}
+
+                                <button
+                                  onClick={() => setSelectedConcept({ ...concept, chapterIdx: index })}
+                                  className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex flex-col items-center justify-center transition-all duration-200 relative border-2 ${
+                                    isLearned
+                                      ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] cursor-pointer"
+                                      : isLocked
+                                      ? "bg-slate-950/60 border-slate-800 text-slate-600 cursor-not-allowed"
+                                      : "bg-indigo-600/20 border-indigo-400 text-indigo-300 hover:bg-indigo-600/30 hover:scale-105 shadow-[0_0_15px_rgba(99,102,241,0.2)] cursor-pointer"
+                                  }`}
+                                >
+                                  {isLearned ? (
+                                    <CheckCircle className="w-5 h-5 text-emerald-400" />
+                                  ) : isLocked ? (
+                                    <Lock className="w-4 h-4" />
+                                  ) : (
+                                    <Play className="w-4 h-4 fill-indigo-400 text-indigo-400 translate-x-[-0.5px]" />
+                                  )}
+
+                                  <span className="absolute -bottom-1 -right-1 bg-slate-900 border border-white/10 text-slate-300 font-mono font-bold text-[8px] w-4.5 h-4.5 rounded-full flex items-center justify-center">
+                                    {cIdx + 1}
+                                  </span>
+                                </button>
+
+                                {activeNode && (
+                                  <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[8px] font-black px-2 py-0.5 rounded shadow-lg animate-bounce pointer-events-none whitespace-nowrap">
+                                    شروع کن!
+                                    <div className="w-1.5 h-1.5 bg-indigo-600 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {!unlocked && (
+                    <div className="py-6 text-center bg-slate-950/20 rounded-xl border border-dashed border-white/5 text-slate-500 flex flex-col items-center justify-center gap-1">
+                      <Lock className="w-5 h-5 text-slate-600" />
+                      <p className="text-[11px] font-extrabold">بخش جراحی بالینی مربوطه قفل است</p>
+                      <p className="text-[9px] text-slate-600">بخش‌های قبلی را کامل کنید تا دسترسی شما فعال شود.</p>
+                    </div>
+                  )}
+
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          {/* 2. Student Leaderboard (Trophy UI style competitive rankings) */}
-          <div className="bg-white border-2 border-b-6 border-slate-200 p-5 rounded-[28px] shadow-2xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="text-right">
-                <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                  <TrendingUp className="w-4 h-4 text-blue-500" />
-                  رده‌بندی دانشجوها
-                </h3>
-                <p className="text-[10px] text-slate-400 font-bold">جدول برترین‌های مدوفیل (رده دانشجویی)</p>
-              </div>
-              <span className="text-[9px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded">
-                لیگ عمومی
-              </span>
-            </div>
+        </motion.div>
 
-            <div className="space-y-2.5">
-              {processedLeaderboard.length === 0 ? (
-                <div className="text-center py-6 text-slate-400 text-xs font-bold bg-slate-50 border border-dashed border-slate-200 rounded-xl">
-                  هنوز هیچ دانشجویی در رده‌بندی ثبت نشده است. اولین نفری باشید که ثبت‌نام می‌کند!
+        {/* Bento Sidebar (Right stacked grid column items) */}
+        <div className="lg:col-span-4 md:col-span-4 space-y-6 flex flex-col">
+          
+          {/* Weekly Streak Indicator with 3D Tilt */}
+          <Tilt3D scale={1.01}>
+            <div className="bg-slate-900/30 border border-white/[0.06] backdrop-blur-xl p-5 rounded-3xl shadow-[0_12px_32px_rgba(0,0,0,0.35)] space-y-4 h-full relative overflow-hidden group">
+              <div className="flex items-center justify-between">
+                <div className="text-right">
+                  <h3 className="text-xs font-black text-white flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-orange-400" />
+                    تقویم هفتگی تداوم (Streak)
+                  </h3>
+                  <p className="text-[9px] text-slate-400">جوایز ویژه برای حضور فعال پزشکان</p>
                 </div>
-              ) : (
-                processedLeaderboard.map((surgeon, sIdx) => {
-                  const getRankBadge = (rank: number) => {
-                    if (rank === 1) return <Crown className="w-4 h-4 text-amber-500 fill-amber-500" />;
-                    if (rank === 2) return <span className="w-4 h-4 bg-slate-200 rounded-full flex items-center justify-center border border-slate-300 text-slate-500 font-mono text-[9px] font-extrabold">2</span>;
-                    if (rank === 3) return <span className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center border border-amber-200 text-amber-700 font-mono text-[9px] font-extrabold">3</span>;
-                    return <span className="w-4 h-4 bg-slate-50 rounded-full flex items-center justify-center border border-slate-200 text-slate-400 font-mono text-[9px] font-extrabold">{rank}</span>;
-                  };
+                <div className="w-8 h-8 shrink-0">
+                  <img 
+                    src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Fire/3D/fire_3d.png" 
+                    alt="Streak Mini 3D" 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(249,115,22,0.2)]"
+                  />
+                </div>
+              </div>
 
-                  return (
+              <div className="flex justify-between gap-1.5 pt-1">
+                {daysOfWeek.map((day, idx) => (
+                  <div key={idx} className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                    <span className={`text-[9px] font-extrabold ${day.isToday ? "text-indigo-400" : "text-slate-500"}`}>
+                      {day.name}
+                    </span>
+                    
+                    <div className={`w-7 h-7 rounded-full border flex items-center justify-center transition-all ${
+                      day.active 
+                        ? "bg-gradient-to-tr from-orange-500 to-amber-500 border-orange-400 text-white shadow-[0_0_10px_rgba(249,115,22,0.2)]"
+                        : day.isToday
+                        ? "bg-slate-900 border-indigo-500/50 border border-dashed text-indigo-400"
+                        : "bg-slate-950/40 border-slate-800/60 text-slate-600"
+                    }`}>
+                      {day.active ? (
+                        <Flame className="w-3.5 h-3.5 text-white fill-white" />
+                      ) : (
+                        <span className="text-[8px] font-black font-mono">
+                          {day.isToday ? "امروز" : ""}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Tilt3D>
+
+          {/* Student Leaderboard Card with 3D Tilt */}
+          <Tilt3D scale={1.01}>
+            <div className="bg-slate-900/30 border border-white/[0.06] backdrop-blur-xl p-5 rounded-3xl shadow-[0_12px_32px_rgba(0,0,0,0.35)] space-y-4 h-full relative overflow-hidden group">
+              <div className="flex items-center justify-between">
+                <div className="text-right">
+                  <h3 className="text-xs font-black text-white flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-indigo-400" />
+                    رده‌بندی پزشکان بالینی
+                  </h3>
+                  <p className="text-[9px] text-slate-400">لیست برترین دانشجویان مدوفیل</p>
+                </div>
+                <div className="w-8 h-8 shrink-0">
+                  <img 
+                    src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Trophy/3D/trophy_3d.png" 
+                    alt="Trophy Mini 3D" 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(16,185,129,0.2)]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-[190px] overflow-y-auto pr-1">
+                {processedLeaderboard.length === 0 ? (
+                  <div className="text-center py-6 text-slate-500 text-[10px] font-bold bg-slate-950/20 border border-dashed border-white/5 rounded-xl">
+                    هنوز رتبه‌ای ثبت نشده است. اولین پزشک باشید!
+                  </div>
+                ) : (
+                  processedLeaderboard.map((surgeon) => (
                     <div 
                       key={surgeon.rank}
                       className={`flex items-center justify-between p-2 rounded-xl border transition-all ${
                         surgeon.isCurrentUser 
-                          ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/10" 
-                          : "bg-white border-slate-100 hover:border-slate-200"
+                          ? "bg-indigo-500/10 border-indigo-500/30 shadow-[0_0_10px_rgba(99,102,241,0.05)]" 
+                          : "bg-slate-950/10 border-white/[0.02] hover:border-white/5"
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="shrink-0">
-                          {getRankBadge(surgeon.rank)}
+                        <div className="shrink-0 font-mono text-[9px] font-black text-slate-400 w-4 text-center">
+                          {surgeon.rank === 1 ? "🥇" : surgeon.rank === 2 ? "🥈" : surgeon.rank === 3 ? "🥉" : surgeon.rank}
                         </div>
 
-                        {/* Avatar */}
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${surgeon.avatarColor}`}>
+                        <div className={`w-6.5 h-6.5 rounded-lg flex items-center justify-center text-[9px] font-black shrink-0 ${surgeon.avatarColor}`}>
                           <span>{surgeon.name.replace("دکتر ", "").substring(0, 1) || "د"}</span>
                         </div>
 
-                        <span className={`text-[11px] font-extrabold truncate ${
-                          surgeon.isCurrentUser ? "text-indigo-950 font-black" : "text-slate-700"
+                        <span className={`text-[10px] font-black truncate ${
+                          surgeon.isCurrentUser ? "text-indigo-300" : "text-slate-200"
                         }`}>
                           {surgeon.name}
                         </span>
                       </div>
 
-                      <span className="font-mono text-xs font-black text-slate-500 shrink-0">
+                      <span className="font-mono text-[10px] font-bold text-slate-400 shrink-0">
                         {surgeon.xp} XP
                       </span>
                     </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* 3. SM-2 Spaced Repetition Review Panel */}
-          <div className="bg-white border-2 border-b-6 border-slate-200 p-5 rounded-[28px] shadow-2xs space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="text-right">
-                <h3 className="text-sm font-black text-slate-800">جعبه ابزار مرور بالینی</h3>
-                <p className="text-[10px] text-slate-400 font-bold">
-                  سیستم هوشمند SM-2 برای بهینه‌سازی ماندگاری مطالب
-                </p>
-              </div>
-              <div className="bg-purple-50 text-purple-600 p-2 rounded-xl border border-purple-100 shrink-0">
-                <RefreshCw className="w-4 h-4 animate-spin text-purple-500" />
+                  ))
+                )}
               </div>
             </div>
+          </Tilt3D>
 
-            <div className="bg-slate-50 p-3.5 rounded-xl text-xs space-y-2 text-slate-500 border border-slate-100 text-right">
-              <p className="leading-relaxed">
-                این جلسه مرور با شبیه‌سازی الگوریتم <strong>Spaced Repetition SM-2</strong> روی اشتباهات گذشته و نقاط ضعف شما متمرکز می‌شود.
-              </p>
-              <div className="flex items-center gap-1.5 pt-1 font-bold text-blue-700">
-                <Sparkles className="w-3.5 h-3.5 text-blue-500 fill-blue-500" />
-                <span>اتمام جلسه مرور = دریافت ۵ جان کامل</span>
+          {/* SM-2 Spaced Repetition Panel with 3D Tilt */}
+          <Tilt3D scale={1.01}>
+            <div className="bg-slate-900/30 border border-white/[0.06] backdrop-blur-xl p-5 rounded-3xl shadow-[0_12px_32px_rgba(0,0,0,0.35)] space-y-4 h-full relative overflow-hidden group">
+              <div className="flex items-start justify-between gap-2">
+                <div className="text-right space-y-0.5">
+                  <h3 className="text-xs font-black text-white">جلسه مرور فاصله‌دار (SM-2)</h3>
+                  <p className="text-[9px] text-slate-400">
+                    بهینه‌سازی تکرار کانون خطاها بر اساس منحنی حافظه
+                  </p>
+                </div>
+                <div className="w-10 h-10 shrink-0">
+                  <img 
+                    src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Brain/3D/brain_3d.png" 
+                    alt="Brain 3D" 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(168,85,247,0.2)]"
+                  />
+                </div>
               </div>
+
+              <div className="bg-slate-950/40 p-3 rounded-xl text-[10px] text-slate-400 border border-white/[0.02] text-right leading-relaxed">
+                مرور مستمر خطاها با الگوریتم <strong>SuperMemo-2</strong> علاوه بر افزایش مهارت، تمام ۵ جان بالینی شما را مجدداً تکمیل می‌کند.
+              </div>
+
+              <button
+                onClick={() => onStartLesson("review", true)}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold text-[11px] py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all border border-white/5 active:scale-98"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                شروع جلسه مرور خطاها
+              </button>
             </div>
+          </Tilt3D>
 
-            <button
-              onClick={() => onStartLesson("review", true)}
-              className="w-full bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white font-black text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all border-b-4 border-slate-950 active:border-b-0 active:translate-y-[4px]"
-            >
-              <BookOpen className="w-4 h-4" />
-              شروع جلسه مرور هوشمند زودهنگام
-            </button>
-          </div>
-
-          {/* 4. Upgrade to Premium Card */}
+          {/* Premium Account Card with 3D Tilt */}
           {userState.isPremium ? (
-            <div className="bg-gradient-to-br from-amber-950/90 to-amber-900/95 border-2 border-b-6 border-amber-500/30 text-amber-50 rounded-[28px] p-5 relative overflow-hidden shadow-xs">
-              <div className="absolute right-0 bottom-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-              
-              <div className="relative space-y-4 text-right">
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full uppercase flex items-center gap-0.5">
-                    <Crown className="w-2.5 h-2.5 fill-slate-950" />
-                    GOLD MEMBER
-                  </span>
-                  <span className="text-[9px] text-amber-200">وضعیت حساب: فعال طلایی</span>
-                </div>
+            <Tilt3D scale={1.01}>
+              <div className="bg-gradient-to-br from-amber-950/80 to-slate-950 border border-amber-500/20 text-amber-50 rounded-3xl p-5 relative overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.45)] group h-full">
+                <div className="absolute left-0 bottom-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl" />
+                
+                <div className="relative space-y-4 text-right">
+                  <div className="flex items-center justify-between">
+                    <span className="bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full uppercase flex items-center gap-0.5 shadow">
+                      <Crown className="w-2.5 h-2.5 fill-slate-950" />
+                      GOLD MEMBER
+                    </span>
+                    <div className="w-8 h-8 shrink-0">
+                      <img 
+                        src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Crown/3D/crown_3d.png" 
+                        alt="Crown 3D" 
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(245,158,11,0.2)] group-hover:scale-110 group-hover:rotate-12 transition-transform"
+                      />
+                    </div>
+                  </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-sm font-black flex items-center gap-1.5 text-amber-300">
-                    شما پزشک طلایی مدوفیل هستید!
-                  </h3>
-                  <p className="text-[10px] text-amber-100/80 leading-relaxed font-sans font-medium">
-                    تمام مباحث آموزشی باز، جان‌های شما نامحدود و گواهی‌نامه رسمی جراحی دیجیتال شما صادر شده است.
-                  </p>
-                </div>
+                  <div className="space-y-0.5">
+                    <h3 className="text-xs font-black text-amber-200">
+                      پرونده طلایی شما فعال است!
+                    </h3>
+                    <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
+                      مهر رسمی، گواهی‌نامه جراحی دیجیتال و منابع مطالعاتی VIP برای شما کاملاً باز می‌باشد.
+                    </p>
+                  </div>
 
-                <button
-                  onClick={() => {
-                    const certBtn = document.getElementById("profile-cert-trigger");
-                    if (certBtn) {
-                      certBtn.click();
-                    } else {
-                      onNavigateTo("profile");
-                    }
-                  }}
-                  className="w-full bg-amber-400 hover:bg-amber-500 active:bg-amber-400 text-slate-950 font-black text-xs py-2.5 px-4 rounded-xl transition-all border-b-4 border-amber-600 active:border-b-0 active:translate-y-[4px] flex items-center justify-center gap-1.5"
-                >
-                  <AwardIcon className="w-4 h-4" />
-                  <span>مشاهده و چاپ گواهی‌نامه</span>
-                </button>
+                  <button
+                    onClick={() => onNavigateTo("profile")}
+                    className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[10px] py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 shadow"
+                  >
+                    <AwardIcon className="w-3.5 h-3.5" />
+                    <span>مشاهده و چاپ گواهی‌نامه</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            </Tilt3D>
           ) : (
-            <div className="bg-gradient-to-br from-indigo-950 to-slate-900 border-2 border-b-6 border-indigo-500/30 text-white rounded-[28px] p-5 relative overflow-hidden shadow-xs">
-              <div className="absolute right-0 bottom-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
-              
-              <div className="relative space-y-4 text-right">
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full uppercase flex items-center gap-0.5">
-                    <Sparkles className="w-2.5 h-2.5 fill-slate-950" />
-                    Premium
-                  </span>
-                  <span className="text-[9px] text-indigo-200">پیشنهاد ویژه دستیار جراحی</span>
-                </div>
+            <Tilt3D scale={1.01}>
+              <div className="bg-gradient-to-br from-indigo-950/60 to-slate-950 border border-indigo-500/10 text-white rounded-3xl p-5 relative overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.45)] group h-full">
+                <div className="absolute left-0 bottom-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl" />
+                
+                <div className="relative space-y-4 text-right">
+                  <div className="flex items-center justify-between">
+                    <span className="bg-amber-400 text-slate-950 font-black text-[8px] px-2 py-0.5 rounded-full uppercase flex items-center gap-0.5 shadow">
+                      <Sparkles className="w-2.5 h-2.5 fill-slate-950" />
+                      Premium
+                    </span>
+                    <div className="w-8 h-8 shrink-0">
+                      <img 
+                        src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Crown/3D/crown_3d.png" 
+                        alt="Crown 3D" 
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(99,102,241,0.2)] group-hover:scale-110 group-hover:rotate-12 transition-transform"
+                      />
+                    </div>
+                  </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-sm font-black flex items-center gap-1.5">
-                    ارتقا به مدوفیل طلایی (Premium)
-                  </h3>
-                  <p className="text-[10px] text-indigo-100/80 leading-relaxed font-sans font-medium">
-                    باز کردن جان‌های بی‌نهایت (∞ Hearts)، صدور گواهی‌نامه رسمی طلایی با مهر آکادمیک و دسترسی به سناریوهای VIP جراحی.
-                  </p>
-                </div>
+                  <div className="space-y-0.5">
+                    <h3 className="text-xs font-black text-indigo-200">
+                      ارتقای پرونده به عضویت طلایی
+                    </h3>
+                    <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
+                      ظرفیت جان‌های نامحدود (∞)، صدور گواهی‌نامه جراحی با مهر معتبر و دسترسی به آزمون‌های تشخیصی VIP.
+                    </p>
+                  </div>
 
-                <button
-                  onClick={onTriggerPremium}
-                  className="w-full bg-white hover:bg-slate-100 text-indigo-950 font-black text-xs py-2.5 px-4 rounded-xl transition-all shadow-xs border-b-4 border-slate-200 active:border-b-0 active:translate-y-[4px]"
-                >
-                  ارتقای طلایی حساب کاربری
-                </button>
+                  <button
+                    onClick={onTriggerPremium}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] active:scale-98"
+                  >
+                    ارتقای آنی حساب کاربری
+                  </button>
+                </div>
               </div>
-            </div>
+            </Tilt3D>
           )}
 
-          {/* Quick navigational shortcuts */}
+          {/* Quick Shortcuts */}
           <div className="flex gap-4">
             <button
               onClick={() => onNavigateTo("profile")}
-              className="flex-1 bg-white border-2 border-b-4 border-slate-200 hover:bg-slate-50 text-slate-700 font-black text-xs py-3 rounded-2xl flex items-center justify-center gap-1.5 transition-all active:border-b-0 active:translate-y-[4px] shadow-2xs"
+              className="flex-1 bg-slate-900/40 border border-white/5 hover:bg-slate-900/60 text-slate-300 font-extrabold text-[10px] py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all"
             >
-              <User className="w-4 h-4 text-slate-400" />
+              <User className="w-3.5 h-3.5 text-slate-500" />
               پروفایل و آمار
             </button>
             <button
               onClick={() => onNavigateTo("settings")}
-              className="flex-1 bg-white border-2 border-b-4 border-slate-200 hover:bg-slate-50 text-slate-700 font-black text-xs py-3 rounded-2xl flex items-center justify-center gap-1.5 transition-all active:border-b-0 active:translate-y-[4px] shadow-2xs"
+              className="flex-1 bg-slate-900/40 border border-white/5 hover:bg-slate-900/60 text-slate-300 font-extrabold text-[10px] py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all"
             >
-              <SettingsIcon className="w-4 h-4 text-slate-400" />
-              تنظیمات
+              <SettingsIcon className="w-3.5 h-3.5 text-slate-500" />
+              تنظیمات عمومی
             </button>
           </div>
 
         </div>
+
       </div>
 
-      {/* Dynamic Visual Knowledge Map section */}
-      <KnowledgeMap userState={userState} onSelectConcept={(cid) => {
-        const conc = concepts.find(c => c.id === cid);
-        if (conc) {
-          onStartLesson(conc.chapterId, false);
-        }
-      }} />
+      {/* ----------------- DYNAMIC VISUAL KNOWLEDGE MAP GRAPH ----------------- */}
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.3 }}
+        className="bg-slate-900/20 border border-white/[0.04] backdrop-blur-md rounded-[32px] p-6"
+      >
+        <KnowledgeMap 
+          userState={userState} 
+          onSelectConcept={(cid) => {
+            const conc = concepts.find(c => c.id === cid);
+            if (conc) {
+              onStartLesson(conc.chapterId, false);
+            }
+          }} 
+        />
+      </motion.div>
+
+      {/* ----------------- DETAILED CONCEPT POPUP MODAL ----------------- */}
+      <AnimatePresence>
+        {selectedConcept && (() => {
+          const isLearned = userState.completedConcepts.includes(selectedConcept.id);
+          const chIdx = selectedConcept.chapterIdx;
+          const chapter = chapters[chIdx];
+          const isChUnlocked = isChapterUnlocked(chapter.id, chIdx);
+          const isUnlocked = isChUnlocked && selectedConcept.prerequisites.every((pid: string) =>
+            userState.completedConcepts.includes(pid)
+          );
+          
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 text-right"
+              dir="rtl"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 350 }}
+                className="bg-slate-900 border border-white/10 rounded-[28px] max-w-md w-full p-6 md:p-8 space-y-5 relative overflow-hidden shadow-2xl"
+              >
+                {/* Visual Top Highlight Accent */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500" />
+                
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedConcept(null)}
+                  className="absolute left-6 top-6 text-slate-400 hover:text-white hover:bg-white/5 p-2 rounded-xl transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="space-y-4">
+                  {/* Status Badges */}
+                  <div className="flex items-center gap-2 pt-2">
+                    {isLearned ? (
+                      <span className="bg-emerald-500/10 text-emerald-400 text-[9px] font-black px-2.5 py-1 rounded-lg border border-emerald-500/20 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        مبحث تسلط یافته
+                      </span>
+                    ) : isUnlocked ? (
+                      <span className="bg-indigo-500/10 text-indigo-400 text-[9px] font-black px-2.5 py-1 rounded-lg border border-indigo-500/20 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        آماده شروع آموزش
+                      </span>
+                    ) : (
+                      <span className="bg-slate-950 text-slate-500 text-[9px] font-black px-2.5 py-1 rounded-lg border border-white/5 flex items-center gap-1">
+                        <Lock className="w-3 h-3" />
+                        مفهوم قفل شده
+                      </span>
+                    )}
+
+                    {selectedConcept.highStakes && (
+                      <span className="bg-rose-500/10 text-rose-400 text-[9px] font-black px-2.5 py-1 rounded-lg border border-rose-500/20">
+                        پیامد بالینی پرخطر
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Concept Titles */}
+                  <div className="space-y-0.5">
+                    <h3 className="text-base font-black text-white leading-tight">
+                      {selectedConcept.title}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-bold">
+                      ارزیابی بالینی: <span className="text-slate-300">{selectedConcept.bloomLevel}</span>
+                    </p>
+                  </div>
+
+                  {/* Educational Content Panel */}
+                  <div className="bg-slate-950 p-4 rounded-2xl border border-white/5 relative">
+                    <h4 className="text-[9px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">مرجع جراحی بالینی:</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                      {selectedConcept.definition}
+                    </p>
+                  </div>
+
+                  {/* Prerequisites Requirements */}
+                  {selectedConcept.prerequisites && selectedConcept.prerequisites.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-wider">پیش‌نیازهای اجباری:</h4>
+                      <div className="space-y-1">
+                        {selectedConcept.prerequisites.map((pid: string) => {
+                          const pre = concepts.find(c => c.id === pid);
+                          const completedPre = userState.completedConcepts.includes(pid);
+                          return (
+                            <div key={pid} className="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-white/[0.02] text-[10px]">
+                              <span className="font-extrabold text-slate-300">{pre ? pre.title : pid}</span>
+                              {completedPre ? (
+                                <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg flex items-center gap-0.5">
+                                  <Check className="w-2.5 h-2.5" /> کامل شده
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-black text-slate-500 bg-slate-900 border border-white/5 px-2 py-0.5 rounded-lg flex items-center gap-0.5">
+                                  <Lock className="w-2.5 h-2.5" /> قفل است
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Actions Area */}
+                  <div className="flex flex-col gap-2 pt-2">
+                    {isUnlocked || isLearned ? (
+                      <button
+                        onClick={() => {
+                          setSelectedConcept(null);
+                          onStartLesson(chapter.id, false);
+                        }}
+                        className="w-full bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(99,102,241,0.25)] flex items-center justify-center gap-1.5 active:scale-98"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-white text-white" />
+                        <span>ورود به آزمون یادگیری بخش</span>
+                      </button>
+                    ) : (
+                      <div className="text-center p-3 bg-slate-950 rounded-xl border border-white/5 text-[10px] text-slate-500 leading-relaxed font-sans">
+                        ⚠️ برای باز کردن این مفهوم، ابتدا پیش‌نیازهای فوق را کامل کنید.
+                      </div>
+                    )}
+                    
+                    <button
+                      onClick={() => setSelectedConcept(null)}
+                      className="w-full bg-slate-950 hover:bg-slate-900 text-slate-400 font-extrabold text-xs py-2.5 rounded-xl transition-all border border-white/5"
+                    >
+                      بستن پنجره
+                    </button>
+                  </div>
+
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
 
     </div>
-  );
-}
-
-// Simple internal helper component for close icon
-function XIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
   );
 }

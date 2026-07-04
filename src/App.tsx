@@ -11,7 +11,7 @@ import Settings from "./components/Settings";
 import PremiumPortal from "./components/PremiumPortal";
 import AuthManager from "./components/AuthManager";
 import SurgicalCertificate from "./components/SurgicalCertificate";
-import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key } from "lucide-react";
+import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -25,6 +25,7 @@ export default function App() {
   const [showPremium, setShowPremium] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
@@ -196,195 +197,309 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] text-[#1a202c] font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-x-hidden pb-12" dir="rtl">
-      {/* Background Decorative Glowing Orbs */}
-      <div className="fixed top-20 left-20 w-96 h-96 bg-blue-200/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
-      <div className="fixed bottom-20 right-20 w-96 h-96 bg-emerald-100/35 rounded-full blur-[100px] pointer-events-none z-0"></div>
+    <div className="min-h-screen bg-[#020617] text-[#f8fafc] font-sans selection:bg-indigo-500/30 selection:text-indigo-200 relative overflow-x-hidden flex flex-col md:flex-row-reverse" dir="rtl">
+      
+      {/* Background Decorative Glowing Orbs (Arjun Next JS Bento Style) */}
+      <div className="fixed top-[-10%] right-[10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[10%] left-[5%] w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+      <div className="fixed top-[40%] left-[40%] w-[350px] h-[350px] bg-purple-500/5 rounded-full blur-[110px] pointer-events-none z-0"></div>
 
-      {/* Top Application Navbar */}
-      <header className="sticky top-0 bg-white/70 backdrop-blur-md border-b border-slate-200/60 z-30 shadow-xs relative">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          
-          {/* Logo Brand */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentView("dashboard")}>
-            <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-extrabold shadow-sm">
-              <span className="text-lg">M</span>
-            </div>
-            <div>
-              <h1 className="text-sm font-black text-slate-800 leading-none">مدوفیل (Medophil)</h1>
-              <span className="text-[10px] text-blue-600 font-bold tracking-wider uppercase">یادگیری جراحی بالینی</span>
-            </div>
-          </div>
+      {/* 1. RIGHT SIDEBAR: Responsive Collapsible Panel (Cruip Style layout) */}
+      {currentView !== "lesson" && currentView !== "result" && (
+        <>
+          {/* Mobile Overlay Backdrop */}
+          {isSidebarOpen && (
+            <div 
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
 
-          {/* Quick Right side stats when on home/profile pages */}
-          {currentView !== "lesson" && (
-            <div className="flex items-center gap-3 md:gap-4">
-              {/* Premium Upgrade Button */}
-              {!userState.isPremium ? (
-                <button
-                  onClick={() => setShowPremium(true)}
-                  className="hidden sm:flex items-center gap-1.5 text-[11px] font-black text-amber-950 bg-gradient-to-r from-amber-400 to-yellow-400 border border-amber-300 px-3 py-1.5 rounded-xl hover:brightness-105 transition-all shadow-xs"
-                >
-                  <Crown className="w-3.5 h-3.5 fill-amber-950/20" />
-                  <span>عضویت طلایی</span>
-                </button>
-              ) : (
-                <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-black text-amber-700 font-mono bg-amber-50/60 border border-amber-200 px-3 py-1.5 rounded-xl">
-                  <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-500 animate-pulse" />
-                  <span>کاربر طلایی</span>
+          <aside className={`fixed md:sticky top-0 right-0 h-screen w-72 bg-slate-950/60 md:bg-slate-900/20 border-l border-white/5 backdrop-blur-2xl z-40 flex flex-col justify-between transition-transform duration-300 md:translate-x-0 shrink-0 ${
+            isSidebarOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"
+          }`}>
+            <div className="p-6 space-y-8">
+              {/* Brand Header */}
+              <div className="flex items-center justify-between pb-6 border-b border-white/5">
+                <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setCurrentView("dashboard"); setIsSidebarOpen(false); }}>
+                  <div className="w-10 h-10 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-extrabold shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                    <span className="text-lg">M</span>
+                  </div>
+                  <div>
+                    <h1 className="text-sm font-black text-white leading-none">مدوفیل</h1>
+                    <span className="text-[9px] text-indigo-400 font-extrabold tracking-wider uppercase">آموزش جراحی بالینی</span>
+                  </div>
                 </div>
-              )}
-
-              {/* Stats */}
-              <div className="flex items-center gap-1 text-xs font-bold text-orange-600 font-mono bg-orange-50/50 backdrop-blur-xs border border-orange-100 px-2 py-1 rounded-full">
-                <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
-                <span>{userState.dailyStreak} روز</span>
-              </div>
-              <div className="flex items-center gap-1 text-xs font-bold text-blue-600 font-mono bg-blue-50/50 backdrop-blur-xs border border-blue-100 px-2 py-1 rounded-full">
-                <Zap className="w-3.5 h-3.5 text-blue-500 fill-blue-500" />
-                <span>{userState.xp} XP</span>
-              </div>
-              <div className="flex items-center gap-1 text-xs font-bold text-rose-600 font-mono bg-rose-50/50 backdrop-blur-xs border border-rose-100 px-2 py-1 rounded-full">
-                <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-                <span>{userState.isPremium ? "∞" : userState.hearts}</span>
+                
+                {/* Close Button Mobile only */}
+                <button 
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="md:hidden text-slate-400 hover:text-white p-1 hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="h-5 w-px bg-slate-200/80 mx-1"></div>
+              {/* Navigation Menu */}
+              <nav className="space-y-1.5">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">منوی ناوبری</p>
+                
+                <button
+                  onClick={() => { setCurrentView("dashboard"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    currentView === "dashboard"
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>داشبورد بالینی</span>
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 opacity-80" />
+                </button>
 
-              {/* Multi-Account Authentication Controls */}
+                <button
+                  onClick={() => { setCurrentView("profile"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    currentView === "profile"
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="w-4 h-4" />
+                    <span>پروفایل و آمار من</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => { setCurrentView("settings"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    currentView === "settings"
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <SettingsIcon className="w-4 h-4" />
+                    <span>تنظیمات عمومی</span>
+                  </div>
+                </button>
+              </nav>
+
+              {/* Actions & Utilities */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">خدمات جراحی</p>
+
+                <button
+                  onClick={() => { setShowCertificate(true); setIsSidebarOpen(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent transition-all"
+                >
+                  <AwardIcon className="w-4 h-4 text-emerald-400" />
+                  <span>مهر و گواهی‌نامه جراحی</span>
+                </button>
+
+                <button
+                  onClick={() => { setShowPremium(true); setIsSidebarOpen(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent transition-all"
+                >
+                  <Crown className="w-4 h-4 text-amber-400 fill-amber-400/10" />
+                  <span>پلن طلایی VIP</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Account Card */}
+            <div className="p-4 border-t border-white/5 bg-slate-950/40">
               {userState.email ? (
-                <div className="flex items-center gap-2">
-                  <div 
-                    onClick={() => setCurrentView("profile")}
-                    className="flex items-center gap-1.5 cursor-pointer hover:bg-slate-50 px-2 py-1 rounded-xl transition-all"
-                  >
-                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 text-[10px] font-bold">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2.5 p-2 bg-white/5 rounded-xl">
+                    <div className="w-8 h-8 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-extrabold text-xs">
                       {userState.fullName ? userState.fullName.substring(0, 1) : "د"}
                     </div>
-                    <span className="text-[11px] font-black text-slate-700 hidden md:inline">دکتر {userState.fullName}</span>
+                    <div className="min-w-0 text-right">
+                      <p className="text-[11px] font-black text-slate-100 truncate">دکتر {userState.fullName}</p>
+                      <p className="text-[9px] text-slate-400 font-mono truncate" dir="ltr">{userState.email}</p>
+                    </div>
                   </div>
                   <button
                     onClick={handleLogout}
-                    title="خروج از حساب"
-                    className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[10px] font-black text-rose-400 hover:text-white hover:bg-rose-500/10 border border-transparent transition-all"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>خروج از حساب</span>
                   </button>
                 </div>
               ) : (
                 <button
-                  onClick={() => setShowAuth(true)}
-                  className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:bg-blue-50/80 border border-blue-100 px-3 py-1.5 rounded-xl transition-all"
+                  onClick={() => { setShowAuth(true); setIsSidebarOpen(false); }}
+                  className="w-full py-2.5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-extrabold rounded-xl transition-all shadow-[0_0_15px_rgba(99,102,241,0.2)] flex items-center justify-center gap-1.5"
                 >
                   <Key className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">ورود / عضویت</span>
+                  <span>ورود به حساب کاربری</span>
                 </button>
               )}
             </div>
-          )}
+          </aside>
+        </>
+      )}
 
-        </div>
-      </header>
+      {/* 2. MAIN LAYOUT AND HEADER CONTENT CONTAINER */}
+      <div className="flex-1 min-h-screen flex flex-col relative z-10 w-full min-w-0">
+        
+        {/* Top Sticky Header (Cruip + Bento Theme) */}
+        {currentView !== "lesson" && currentView !== "result" && (
+          <header className="sticky top-0 bg-[#020617]/40 backdrop-blur-lg border-b border-white/5 z-30 px-4 md:px-8 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Sidebar trigger on mobile */}
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="md:hidden text-slate-400 hover:text-white p-2 hover:bg-white/5 rounded-xl transition-all"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              
+              {/* Navigation title */}
+              <div className="text-right">
+                <span className="text-[10px] font-extrabold text-indigo-400 tracking-wide block">سامانه پایش پزشکان</span>
+                <h2 className="text-xs font-black text-white">
+                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : "تنظیمات عمومی پرونده"}
+                </h2>
+              </div>
+            </div>
 
-      {/* Main Container Stage */}
-      <main className="max-w-5xl mx-auto px-4 py-8 relative z-10">
-        <AnimatePresence mode="wait">
-          
-          {/* Dashboard View */}
-          {currentView === "dashboard" && (
-            <motion.div
-              key="dashboard"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Dashboard
-                userState={userState}
-                currentUser={currentUser}
-                onStartLesson={handleStartLesson}
-                onNavigateTo={(view) => setCurrentView(view as any)}
-                onTriggerPremium={() => setShowPremium(true)}
-              />
-            </motion.div>
-          )}
+            {/* Glowing Stats Indicators */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Daily Streak Indicator */}
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-orange-400 font-mono bg-orange-500/10 border border-orange-500/20 px-2.5 py-1.5 rounded-xl shadow-[0_0_15px_rgba(249,115,22,0.1)]">
+                <Flame className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
+                <span>{userState.dailyStreak} روز</span>
+              </div>
 
-          {/* Lesson Active View */}
-          {currentView === "lesson" && (
-            <motion.div
-              key="lesson"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Lesson
-                chapterId={activeChapterId}
-                isReview={isReviewSession}
-                userState={userState}
-                onLessonComplete={handleLessonComplete}
-                onLessonExit={() => setCurrentView("dashboard")}
-              />
-            </motion.div>
-          )}
+              {/* XP score Indicator */}
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-400 font-mono bg-blue-500/10 border border-blue-500/20 px-2.5 py-1.5 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                <Zap className="w-3.5 h-3.5 text-blue-400 fill-blue-400" />
+                <span>{userState.xp} XP</span>
+              </div>
 
-          {/* Results Summary View */}
-          {currentView === "result" && lastSessionResult && (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Result
-                xpEarned={lastSessionResult.xp}
-                failedConceptIds={lastSessionResult.failedConceptIds}
-                heartsRemaining={userState.hearts}
-                isReview={isReviewSession}
-                onNavigateHome={() => setCurrentView("dashboard")}
-              />
-            </motion.div>
-          )}
+              {/* Clinical Health (Hearts) */}
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-rose-400 font-mono bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.1)]">
+                <Heart className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
+                <span>{userState.isPremium ? "∞" : userState.hearts}</span>
+              </div>
+            </div>
+          </header>
+        )}
 
-          {/* User Profile View */}
-          {currentView === "profile" && (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Profile
-                userState={userState}
-                onNavigateHome={() => setCurrentView("dashboard")}
-                onTriggerReview={() => handleStartLesson("review", true)}
-                onTriggerCertificate={() => setShowCertificate(true)}
-                onTriggerPremium={() => setShowPremium(true)}
-              />
-            </motion.div>
-          )}
+        {/* View Port Content Area */}
+        <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
+          <AnimatePresence mode="wait">
+            
+            {/* Dashboard View */}
+            {currentView === "dashboard" && (
+              <motion.div
+                key="dashboard"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Dashboard
+                  userState={userState}
+                  currentUser={currentUser}
+                  onStartLesson={handleStartLesson}
+                  onNavigateTo={(view) => setCurrentView(view as any)}
+                  onTriggerPremium={() => setShowPremium(true)}
+                />
+              </motion.div>
+            )}
 
-          {/* Settings View */}
-          {currentView === "settings" && (
-            <motion.div
-              key="settings"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Settings
-                userState={userState}
-                onUpdateState={handleUpdateState}
-                onNavigateHome={() => setCurrentView("dashboard")}
-              />
-            </motion.div>
-          )}
+            {/* Lesson Active View */}
+            {currentView === "lesson" && (
+              <motion.div
+                key="lesson"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.25 }}
+              >
+                <Lesson
+                  chapterId={activeChapterId}
+                  isReview={isReviewSession}
+                  userState={userState}
+                  onLessonComplete={handleLessonComplete}
+                  onLessonExit={() => setCurrentView("dashboard")}
+                />
+              </motion.div>
+            )}
 
-        </AnimatePresence>
-      </main>
+            {/* Results Summary View */}
+            {currentView === "result" && lastSessionResult && (
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Result
+                  xpEarned={lastSessionResult.xp}
+                  failedConceptIds={lastSessionResult.failedConceptIds}
+                  heartsRemaining={userState.hearts}
+                  isReview={isReviewSession}
+                  onNavigateHome={() => setCurrentView("dashboard")}
+                />
+              </motion.div>
+            )}
+
+            {/* User Profile View */}
+            {currentView === "profile" && (
+              <motion.div
+                key="profile"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Profile
+                  userState={userState}
+                  onNavigateHome={() => setCurrentView("dashboard")}
+                  onTriggerReview={() => handleStartLesson("review", true)}
+                  onTriggerCertificate={() => setShowCertificate(true)}
+                  onTriggerPremium={() => setShowPremium(true)}
+                />
+              </motion.div>
+            )}
+
+            {/* Settings View */}
+            {currentView === "settings" && (
+              <motion.div
+                key="settings"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Settings
+                  userState={userState}
+                  onUpdateState={handleUpdateState}
+                  onNavigateHome={() => setCurrentView("dashboard")}
+                />
+              </motion.div>
+            )}
+
+          </AnimatePresence>
+        </main>
+
+        {/* Global Footer (Frosted Glassmorphic layout) */}
+        {currentView !== "lesson" && currentView !== "result" && (
+          <footer className="border-t border-white/5 py-6 px-4 md:px-8 text-center text-[11px] text-slate-500 font-medium">
+            <p className="font-sans">مدوفیل (Medophil) © {new Date().getFullYear()} - پلتفرم هوشمند جراحی بالینی به سبک گیمیفاید</p>
+            <p className="text-[10px] text-slate-600 mt-1">تلفیق تجارب آموزشی و هوش محاسباتی برای ارتقای سلامت جامعه</p>
+          </footer>
+        )}
+      </div>
 
       {/* Premium, Authentication, and Certificate Overlays */}
       <AnimatePresence>
@@ -411,12 +526,6 @@ export default function App() {
           />
         )}
       </AnimatePresence>
-
-      {/* Footer Branding credits */}
-      <footer className="bg-white/40 backdrop-blur-md border-t border-slate-200/50 py-6 mt-16 text-center text-xs text-slate-500 font-medium relative z-10 rounded-t-3xl">
-        <p>مدوفیل (Medophil) © {new Date().getFullYear()} - پلتفرم گیمیفاید آموزش جراحی بالینی</p>
-        <p className="text-[10px] text-slate-400 mt-1">توسعه یافته توسط مهندس نرم‌افزار ارشد و طراح محصولات آموزشی</p>
-      </footer>
     </div>
   );
 }
