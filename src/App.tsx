@@ -206,7 +206,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-[#f8fafc] font-sans selection:bg-indigo-500/30 selection:text-indigo-200 relative overflow-x-hidden flex flex-col md:flex-row-reverse" dir="rtl">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500/30 selection:text-indigo-200 relative overflow-x-hidden flex flex-col md:flex-row-reverse" dir="rtl">
       
       {/* Background Decorative Glowing Orbs (Arjun Next JS Bento Style) */}
       <div className="fixed top-[-10%] right-[10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -385,7 +385,7 @@ export default function App() {
         
         {/* Top Sticky Header (Cruip + Bento Theme) */}
         {currentView !== "lesson" && currentView !== "result" && (
-          <header className="sticky top-0 bg-[#020617]/40 backdrop-blur-lg border-b border-white/5 z-30 px-4 md:px-8 h-16 flex items-center justify-between">
+          <header className="sticky top-0 bg-slate-950/40 backdrop-blur-lg border-b border-white/5 z-30 px-4 md:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Sidebar trigger on mobile */}
               <button 

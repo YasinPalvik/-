@@ -1,5 +1,51 @@
 @import "tailwindcss";
 
+@theme {
+  --color-slate-950: #fdfbf7;
+  --color-slate-900: #fcfaf4;
+  --color-slate-850: #f6f3e8;
+  --color-slate-800: #e2ded1;
+  --color-slate-700: #c2bdb0;
+  --color-slate-600: #78716c;
+  --color-slate-500: #78716c;
+  --color-slate-400: #78716c;
+  --color-slate-300: #78716c;
+  --color-slate-200: #292524;
+  --color-slate-100: #292524;
+  --color-slate-50: #292524;
+
+  --color-indigo-950: #fdfbf7;
+  --color-indigo-900: #fcfaf4;
+  --color-indigo-800: #e2ded1;
+  --color-indigo-700: #daa23b;
+  --color-indigo-600: #daa23b;
+  --color-indigo-500: #daa23b;
+  --color-indigo-400: #daa23b;
+  --color-indigo-300: #78716c;
+  --color-indigo-200: #292524;
+  --color-indigo-100: #292524;
+  --color-indigo-50: #292524;
+
+  --color-purple-950: #fdfbf7;
+  --color-purple-900: #fcfaf4;
+  --color-purple-800: #e2ded1;
+  --color-purple-700: #daa23b;
+  --color-purple-600: #daa23b;
+  --color-purple-500: #daa23b;
+  --color-purple-400: #daa23b;
+  --color-purple-300: #daa23b;
+  --color-purple-200: #292524;
+  --color-purple-100: #292524;
+
+  --color-emerald-500: #84cc16;
+  --color-emerald-400: #84cc16;
+  --color-emerald-600: #65a30d;
+
+  --color-amber-500: #daa23b;
+  --color-amber-400: #daa23b;
+  --color-amber-600: #b5802a;
+}
+
 @keyframes levitate {
   0% {
     transform: translateY(0px) rotate(0deg);
@@ -30,4 +76,159 @@
 
 .animate-levitate-delayed {
   animation: levitate-delayed 7s ease-in-out infinite;
+}
+
+/* ----------------------------------------------------
+   Warm Minimalist UI Overrides & Theme Restyling
+   ---------------------------------------------------- */
+
+/* Body & Base typography rules */
+body, html {
+  background-color: #fdfbf7 !important;
+  color: #292524 !important;
+}
+
+::selection {
+  background-color: rgba(218, 162, 59, 0.2) !important;
+  color: #292524 !important;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #fdfbf7;
+}
+::-webkit-scrollbar-thumb {
+  background: #78716c;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #292524;
+}
+
+/* Background containers and cards */
+.bg-slate-950, .bg-slate-900, .bg-slate-900\/60, .bg-slate-950\/60, .bg-slate-950\/40, 
+.bg-slate-950\/70, .bg-slate-900\/80, .bg-slate-900\/20, .bg-slate-950\/80, .bg-slate-950\/50, 
+.bg-slate-950\/90, .bg-slate-900\/40, .bg-[#020617] {
+  background-color: #fcfaf4 !important;
+  border-color: rgba(41, 37, 36, 0.08) !important;
+}
+
+/* Inner elements and items */
+.bg-white\/5, .bg-white\/10, .bg-slate-800, .bg-slate-800\/50, .bg-slate-800\/40, .bg-slate-950\/30 {
+  background-color: #f7f3ea !important;
+  border-color: rgba(41, 37, 36, 0.08) !important;
+}
+
+/* Floating background glowing orbs - make them very soft warm tones */
+.bg-indigo-500\/10, .bg-purple-500\/10, .bg-emerald-500\/10, .bg-emerald-500\/5, .bg-blue-500\/10, .bg-pink-500\/10 {
+  background-color: rgba(218, 162, 59, 0.03) !important;
+}
+
+/* Override borders across all structures */
+.border-white\/5, .border-white\/10, .border-white\/20, .border-slate-800, .border-slate-700, 
+.border-slate-800\/60, .border-indigo-500\/10, .border-indigo-500\/20, .border-purple-500\/10, 
+.border-purple-500\/20 {
+  border-color: rgba(41, 37, 36, 0.08) !important;
+}
+
+/* Contrast Typography: Override light/white fonts to rich dark chocolate */
+.text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-50, .text-slate-50\/80, 
+.text-gray-100, .text-gray-200, .text-zinc-100, .text-stone-100, .text-neutral-100, h1, h2, h3, h4, h5, h6 {
+  color: #292524 !important;
+}
+
+/* Secondary Typography: Override muted states to clean taupe */
+.text-slate-400, .text-slate-500, .text-slate-600, .text-zinc-400, .text-zinc-500, .text-gray-400, 
+.text-gray-500, .text-stone-400, .text-neutral-400, .text-slate-500\/80 {
+  color: #78716c !important;
+}
+
+/* Primary Accents and interactive links to Gold */
+.text-indigo-400, .text-purple-400, .text-violet-400, .text-cyan-400, .text-blue-400, .text-pink-400,
+.text-indigo-500, .text-purple-500, .text-blue-500, .text-cyan-500 {
+  color: #daa23b !important;
+}
+
+/* Success Elements to Soft Olive Green */
+.text-emerald-400, .text-emerald-300, .text-emerald-500, .text-green-400, .text-green-500 {
+  color: #84cc16 !important;
+}
+
+.bg-emerald-500, .bg-emerald-600, .bg-emerald-500\/10, .bg-emerald-500\/15, .bg-emerald-500\/20 {
+  background-color: rgba(132, 204, 22, 0.1) !important;
+  color: #84cc16 !important;
+  border-color: rgba(132, 204, 22, 0.2) !important;
+}
+
+/* Primary Buttons, Highlights & Badges to Premium Gold */
+.bg-indigo-600, .bg-indigo-500, .bg-purple-600, .bg-purple-500, .bg-gradient-to-tr, .bg-gradient-to-r {
+  background: #daa23b !important;
+  color: #fdfbf7 !important;
+}
+
+.bg-indigo-600 *, .bg-indigo-500 *, .bg-purple-600 *, .bg-purple-500 *, .bg-gradient-to-tr *, .bg-gradient-to-r * {
+  color: #fdfbf7 !important;
+}
+
+.bg-indigo-600:hover, .bg-indigo-500:hover, .bg-purple-600:hover, .bg-purple-500:hover {
+  background-color: #b5802a !important;
+}
+
+/* Navigation items active state gold highlights */
+.bg-indigo-500\/10, .bg-purple-500\/10, .bg-indigo-500\/15 {
+  background-color: rgba(218, 162, 59, 0.08) !important;
+  border-color: rgba(218, 162, 59, 0.2) !important;
+  color: #daa23b !important;
+}
+.bg-indigo-500\/10 *, .bg-purple-500\/10 *, .bg-indigo-500\/15 * {
+  color: #daa23b !important;
+}
+
+/* Badges fill and color definitions */
+.bg-cyan-500\/15, .bg-indigo-500\/15, .bg-purple-500\/15, .bg-emerald-500\/15, .bg-pink-500\/15, .bg-amber-500\/15 {
+  background-color: rgba(218, 162, 59, 0.08) !important;
+  color: #daa23b !important;
+  border-color: rgba(218, 162, 59, 0.15) !important;
+}
+
+/* Sidebar Specific Elements */
+aside {
+  background-color: #fcfaf4 !important;
+  border-left: 1px solid rgba(41, 37, 36, 0.08) !important;
+}
+
+/* Chat overlay and popups */
+.backdrop-blur-2xl, .backdrop-blur-xl, .backdrop-blur-lg, .backdrop-blur-md {
+  background-color: rgba(253, 251, 247, 0.95) !important;
+  border: 1px solid rgba(41, 37, 36, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(41, 37, 36, 0.1) !important;
+}
+
+/* Custom 3D chapter cards styling */
+.chapter-card {
+  background-color: #fcfaf4 !important;
+  border: 1px solid rgba(41, 37, 36, 0.08) !important;
+  transition: all 0.3s ease;
+}
+.chapter-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(218, 162, 59, 0.08) !important;
+  border-color: rgba(218, 162, 59, 0.3) !important;
+}
+
+/* Success checkbox and option borders */
+.option-button-selected {
+  border-color: #daa23b !important;
+  background-color: rgba(218, 162, 59, 0.04) !important;
+  color: #292524 !important;
+}
+
+/* Active buttons or icons in Lesson slides */
+.bg-indigo-600\/20, .bg-purple-600\/20 {
+  background-color: rgba(218, 162, 59, 0.1) !important;
+  color: #daa23b !important;
 }

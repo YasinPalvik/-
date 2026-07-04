@@ -16,13 +16,13 @@ export default function AntigravityCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -1000, y: -1000, active: false });
 
-  // Map theme colors to CSS colors
+  // Map theme colors to CSS colors to match the Warm Minimalist theme
   const colorMap = {
-    indigo: { rgb: "99, 102, 241", glow: "rgba(168, 85, 247, 0.15)" },
-    cyan: { rgb: "6, 182, 212", glow: "rgba(6, 182, 212, 0.15)" },
-    rose: { rgb: "244, 63, 94", glow: "rgba(244, 63, 94, 0.15)" },
-    emerald: { rgb: "16, 185, 129", glow: "rgba(16, 185, 129, 0.15)" },
-    amber: { rgb: "245, 158, 11", glow: "rgba(245, 158, 11, 0.15)" },
+    indigo: { rgb: "218, 162, 59", glow: "rgba(218, 162, 59, 0.08)" }, // Gold
+    cyan: { rgb: "41, 37, 36", glow: "rgba(41, 37, 36, 0.04)" }, // Dark Chocolate
+    rose: { rgb: "120, 113, 108", glow: "rgba(120, 113, 108, 0.04)" }, // Taupe
+    emerald: { rgb: "132, 204, 22", glow: "rgba(132, 204, 22, 0.06)" }, // Olive Green
+    amber: { rgb: "214, 131, 56", glow: "rgba(214, 131, 56, 0.06)" }, // Ochre
   };
 
   const selectedTheme = colorMap[themeColor] || colorMap.indigo;
@@ -235,7 +235,7 @@ export default function AntigravityCanvas({
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ mixBlendMode: "screen" }}
+      style={{ mixBlendMode: "multiply", opacity: 0.7 }}
     />
   );
 }
