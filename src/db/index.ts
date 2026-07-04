@@ -2,6 +2,9 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import pkg from 'pg';
 const { Pool } = pkg;
 import * as schema from './schema.ts';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export const createPool = () => {
   return new Pool({

@@ -301,6 +301,7 @@ export default function App() {
             >
               <Dashboard
                 userState={userState}
+                currentUser={currentUser}
                 onStartLesson={handleStartLesson}
                 onNavigateTo={(view) => setCurrentView(view as any)}
                 onTriggerPremium={() => setShowPremium(true)}

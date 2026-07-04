@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Chapter, UserState } from "../types";
 import { chapters, concepts } from "../lib/state";
 import { 
@@ -28,6 +28,7 @@ import KnowledgeMap from "./KnowledgeMap";
 
 interface DashboardProps {
   userState: UserState;
+  currentUser?: any;
   onStartLesson: (chapterId: string, isReview: boolean) => void;
   onNavigateTo: (view: "profile" | "settings") => void;
   onTriggerPremium: () => void;
@@ -145,8 +146,30 @@ const chapterThemes = [
   }
 ];
 
-export default function Dashboard({ userState, onStartLesson, onNavigateTo, onTriggerPremium }: DashboardProps) {
+export default function Dashboard({ userState, currentUser, onStartLesson, onNavigateTo, onTriggerPremium }: DashboardProps) {
   const [selectedConcept, setSelectedConcept] = useState<any | null>(null);
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await fetch("/api/leaderboard");
+        if (res.ok) {
+          const data = await res.json();
+          if (active) {
+            setLeaderboardData(data);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch leaderboard:", err);
+      }
+    };
+    fetchLeaderboard();
+    return () => {
+      active = false;
+    };
+  }, [userState.xp]);
 
   // Check if a chapter is unlocked
   const isChapterUnlocked = (chapterId: string, idx: number) => {
@@ -172,14 +195,27 @@ export default function Dashboard({ userState, onStartLesson, onNavigateTo, onTr
     );
   };
 
-  // Surgeon Leaderboard Mock Data (Trophy UI / Gamification)
-  const leaderboardData = [
-    { rank: 1, name: "دکتر مریم رضایی", xp: 540, avatarColor: "bg-amber-100 text-amber-600", isCurrentUser: false },
-    { rank: 2, name: "دکتر پوریا حسینی", xp: 410, avatarColor: "bg-blue-100 text-blue-600", isCurrentUser: false },
-    { rank: 3, name: `دکتر ${userState.fullName || "کاربر مهمان"} (شما)`, xp: userState.xp, avatarColor: "bg-indigo-600 text-white", isCurrentUser: true },
-    { rank: 4, name: "دکتر سارا احمدی", xp: 180, avatarColor: "bg-purple-100 text-purple-600", isCurrentUser: false },
-    { rank: 5, name: "دکتر علی اصغری", xp: 120, avatarColor: "bg-rose-100 text-rose-600", isCurrentUser: false },
-  ].sort((a, b) => b.xp - a.xp);
+  // Process leaderboard from fetched DB users
+  const processedLeaderboard = leaderboardData.map((surgeon, sIdx) => {
+    const isCurrentUser = currentUser?.uid === surgeon.uid || (userState.email && userState.email === surgeon.email);
+    
+    const colors = [
+      "bg-amber-100 text-amber-600",
+      "bg-blue-100 text-blue-600",
+      "bg-purple-100 text-purple-600",
+      "bg-rose-100 text-rose-600",
+      "bg-emerald-100 text-emerald-600"
+    ];
+    const avatarColor = isCurrentUser ? "bg-indigo-600 text-white" : (colors[sIdx % colors.length]);
+
+    return {
+      rank: sIdx + 1,
+      name: surgeon.name,
+      xp: surgeon.xp,
+      avatarColor,
+      isCurrentUser,
+    };
+  });
 
   // Weekly streak calendar
   const daysOfWeek = [
@@ -608,15 +644,15 @@ export default function Dashboard({ userState, onStartLesson, onNavigateTo, onTr
             </div>
           </div>
 
-          {/* 2. Surgeon Leaderboard (Trophy UI style competitive rankings) */}
+          {/* 2. Student Leaderboard (Trophy UI style competitive rankings) */}
           <div className="bg-white border-2 border-b-6 border-slate-200 p-5 rounded-[28px] shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="text-right">
                 <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4 text-blue-500" />
-                  رده‌بندی رزیدنت‌های جراحی
+                  رده‌بندی دانشجوها
                 </h3>
-                <p className="text-[10px] text-slate-400 font-bold">جدول برترین‌های مدوفیل (رده رزیدنتی)</p>
+                <p className="text-[10px] text-slate-400 font-bold">جدول برترین‌های مدوفیل (رده دانشجویی)</p>
               </div>
               <span className="text-[9px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded">
                 لیگ عمومی
@@ -624,46 +660,52 @@ export default function Dashboard({ userState, onStartLesson, onNavigateTo, onTr
             </div>
 
             <div className="space-y-2.5">
-              {leaderboardData.map((surgeon, sIdx) => {
-                const getRankBadge = (rank: number) => {
-                  if (rank === 1) return <Crown className="w-4 h-4 text-amber-500 fill-amber-500" />;
-                  if (rank === 2) return <span className="w-4 h-4 bg-slate-200 rounded-full flex items-center justify-center border border-slate-300 text-slate-500 font-mono text-[9px] font-extrabold">2</span>;
-                  if (rank === 3) return <span className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center border border-amber-200 text-amber-700 font-mono text-[9px] font-extrabold">3</span>;
-                  return <span className="w-4 h-4 bg-slate-50 rounded-full flex items-center justify-center border border-slate-200 text-slate-400 font-mono text-[9px] font-extrabold">{rank}</span>;
-                };
+              {processedLeaderboard.length === 0 ? (
+                <div className="text-center py-6 text-slate-400 text-xs font-bold bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                  هنوز هیچ دانشجویی در رده‌بندی ثبت نشده است. اولین نفری باشید که ثبت‌نام می‌کند!
+                </div>
+              ) : (
+                processedLeaderboard.map((surgeon, sIdx) => {
+                  const getRankBadge = (rank: number) => {
+                    if (rank === 1) return <Crown className="w-4 h-4 text-amber-500 fill-amber-500" />;
+                    if (rank === 2) return <span className="w-4 h-4 bg-slate-200 rounded-full flex items-center justify-center border border-slate-300 text-slate-500 font-mono text-[9px] font-extrabold">2</span>;
+                    if (rank === 3) return <span className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center border border-amber-200 text-amber-700 font-mono text-[9px] font-extrabold">3</span>;
+                    return <span className="w-4 h-4 bg-slate-50 rounded-full flex items-center justify-center border border-slate-200 text-slate-400 font-mono text-[9px] font-extrabold">{rank}</span>;
+                  };
 
-                return (
-                  <div 
-                    key={surgeon.rank}
-                    className={`flex items-center justify-between p-2 rounded-xl border transition-all ${
-                      surgeon.isCurrentUser 
-                        ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/10" 
-                        : "bg-white border-slate-100 hover:border-slate-200"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="shrink-0">
-                        {getRankBadge(surgeon.rank)}
+                  return (
+                    <div 
+                      key={surgeon.rank}
+                      className={`flex items-center justify-between p-2 rounded-xl border transition-all ${
+                        surgeon.isCurrentUser 
+                          ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/10" 
+                          : "bg-white border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="shrink-0">
+                          {getRankBadge(surgeon.rank)}
+                        </div>
+
+                        {/* Avatar */}
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${surgeon.avatarColor}`}>
+                          <span>{surgeon.name.replace("دکتر ", "").substring(0, 1) || "د"}</span>
+                        </div>
+
+                        <span className={`text-[11px] font-extrabold truncate ${
+                          surgeon.isCurrentUser ? "text-indigo-950 font-black" : "text-slate-700"
+                        }`}>
+                          {surgeon.name}
+                        </span>
                       </div>
 
-                      {/* Fake Avatar */}
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${surgeon.avatarColor}`}>
-                        <span>{surgeon.name.substring(5, 6)}</span>
-                      </div>
-
-                      <span className={`text-[11px] font-extrabold truncate ${
-                        surgeon.isCurrentUser ? "text-indigo-950 font-black" : "text-slate-700"
-                      }`}>
-                        {surgeon.name}
+                      <span className="font-mono text-xs font-black text-slate-500 shrink-0">
+                        {surgeon.xp} XP
                       </span>
                     </div>
-
-                    <span className="font-mono text-xs font-black text-slate-500 shrink-0">
-                      {surgeon.xp} XP
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 

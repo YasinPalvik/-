@@ -1,8 +1,11 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { requireAuth, AuthRequest } from "./src/middleware/auth.ts";
-import { getOrCreateUser, updateUserState } from "./src/db/users.ts";
+import { getOrCreateUser, updateUserState, getAllUsersForLeaderboard } from "./src/db/users.ts";
 
 async function startServer() {
   const app = express();
@@ -14,6 +17,17 @@ async function startServer() {
   // API Health Check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // Get users leaderboard
+  app.get("/api/leaderboard", async (req, res) => {
+    try {
+      const list = await getAllUsersForLeaderboard();
+      res.json(list);
+    } catch (error: any) {
+      console.error("API get /api/leaderboard failed:", error);
+      res.status(500).json({ error: error.message || "Failed to retrieve leaderboard" });
+    }
   });
 
   // Get user profile and state
