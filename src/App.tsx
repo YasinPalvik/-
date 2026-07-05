@@ -5,6 +5,7 @@ import { auth } from "./lib/firebase.ts";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import Dashboard from "./components/Dashboard";
 import Lesson from "./components/Lesson";
+import IslandGlobeWorkspace from "./components/IslandGlobeWorkspace";
 import Result from "./components/Result";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
@@ -482,14 +483,25 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.25 }}
+                className="w-full h-full"
               >
-                <Lesson
-                  chapterId={activeChapterId}
-                  isReview={isReviewSession}
-                  userState={userState}
-                  onLessonComplete={handleLessonComplete}
-                  onLessonExit={() => setCurrentView("dashboard")}
-                />
+                {isReviewSession ? (
+                  <Lesson
+                    chapterId={activeChapterId}
+                    isReview={isReviewSession}
+                    userState={userState}
+                    onLessonComplete={handleLessonComplete}
+                    onLessonExit={() => setCurrentView("dashboard")}
+                  />
+                ) : (
+                  <IslandGlobeWorkspace
+                    chapterId={activeChapterId}
+                    userState={userState}
+                    onUpdateState={handleUpdateState}
+                    onExit={() => setCurrentView("dashboard")}
+                    themeColor={themeColor}
+                  />
+                )}
               </motion.div>
             )}
 
