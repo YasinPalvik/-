@@ -7,34 +7,51 @@ import { createServer as createViteServer } from "vite";
 import { requireAuth, AuthRequest } from "./src/middleware/auth.ts";
 import { getOrCreateUser, updateUserState, getAllUsersForLeaderboard } from "./src/db/users.ts";
 import { GoogleGenAI } from "@google/genai";
-import { syllabi } from "./src/data/syllabus.ts";
+import { 
+  seedContentIfEmpty,
+  getChapters,
+  getConcepts,
+  getExercises,
+  getSyllabi,
+  getIslandQuestions,
+  saveSyllabusChapter,
+  saveIslandQuestion,
+  saveChapter,
+  saveConcept,
+  saveExercise
+} from "./src/db/content.ts";
 
-// Helper function to build a comprehensive RAG syllabus context for Gemini
-function getSyllabusContext(): string {
+// Helper function to build a comprehensive dynamic RAG syllabus context for Gemini
+async function getSyllabusContextDynamic(): Promise<string> {
   let context = "دستورالعمل‌های سیستم (System Instructions):\n";
   context += "شما جراح مینو (Minoo AI) - دستیار هوشمند و فوق‌تخصص جراحی عمومی مبتنی بر آنتی‌گراویتی هستید. وظیفه شما پاسخ به سوالات علمی، درسی، تشخیصی و کاربردی پزشکان و دانشجویان جراحی عمومی با استناد دقیق به محتوای درسی (Syllabus) زیر است.\n";
   context += "بسیار مهم: شما باید طوری رفتار کنید که گویی تمام اطلاعات زیر را کاملاً حفظ هستید و با تسلط کامل بر رفرنس‌ها پاسخ می‌دهید.\n";
   context += "لحن شما باید علمی، دقیق، دلسوزانه، سرشار از انگیزه و تماماً به زبان فارسی باشد. در پاسخ‌های خود از واژگان تخصصی پزشکی (Medical Jargon) با نگارش فارسی و انگلیسی استفاده کنید.\n\n";
   context += "محتوای علمی و فصل‌های مرجع جراحی عمومی:\n";
 
-  for (const [key, ch] of Object.entries(syllabi)) {
-    context += `\n--- [فصل: ${ch.overview}] ---\n`;
-    context += `شناسه فصل در سیستم: ${ch.chapterId}\n`;
-    
-    context += "مباحث کلیدی فصل:\n";
-    ch.sections.forEach((sec, idx) => {
-      context += `${idx + 1}. ${sec.title}:\n${sec.content}\n\n`;
-    });
+  try {
+    const dynamicSyllabi = await getSyllabi();
+    for (const [key, ch] of Object.entries(dynamicSyllabi)) {
+      context += `\n--- [فصل: ${ch.overview}] ---\n`;
+      context += `شناسه فصل در سیستم: ${ch.chapterId}\n`;
+      
+      context += "مباحث کلیدی فصل:\n";
+      ch.sections.forEach((sec, idx) => {
+        context += `${idx + 1}. ${sec.title}:\n${sec.content}\n\n`;
+      });
 
-    context += "⚠️ تله‌های بالینی بسیار خطرناک (Clinical Pitfalls) - که نادیده گرفتن آنها باعث مرگ حتمی بیمار می‌شود:\n";
-    ch.pitfalls.forEach((pit, idx) => {
-      context += `- تله شماره ${idx + 1}: ${pit.title}\n  توضیح پاتولوژی: ${pit.description}\n  عواقب مرگبار بالینی: ${pit.consequence}\n\n`;
-    });
+      context += "⚠️ تله‌های بالینی بسیار خطرناک (Clinical Pitfalls) - که نادیده گرفتن آنها باعث مرگ حتمی بیمار می‌شود:\n";
+      ch.pitfalls.forEach((pit, idx) => {
+        context += `- تله شماره ${idx + 1}: ${pit.title}\n  توضیح پاتولوژی: ${pit.description}\n  عواقب مرگبار بالینی: ${pit.consequence}\n\n`;
+      });
 
-    context += "💎 مرواریدهای جراحی و نکات طلایی گرانبها (Combined Pearls):\n";
-    ch.combinedPearls.forEach((pearl, idx) => {
-      context += `- ${pearl.title}: ${pearl.content}\n\n`;
-    });
+      context += "💎 مرواریدهای جراحی و نکات طلایی گرانبها (Combined Pearls):\n";
+      ch.combinedPearls.forEach((pearl, idx) => {
+        context += `- ${pearl.title}: ${pearl.content}\n\n`;
+      });
+    }
+  } catch (err) {
+    console.error("Failed to build dynamic RAG context:", err);
   }
 
   context += "\nقوانین پاسخگویی جراح مینو:\n";
@@ -53,6 +70,13 @@ async function startServer() {
   // Body parser
   app.use(express.json());
 
+  // Bootstrap/Seed Firestore on startup
+  try {
+    await seedContentIfEmpty();
+  } catch (err) {
+    console.error("Failed during server startup seeding:", err);
+  }
+
   // API Health Check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
@@ -66,6 +90,100 @@ async function startServer() {
     } catch (error: any) {
       console.error("API get /api/leaderboard failed:", error);
       res.status(500).json({ error: error.message || "Failed to retrieve leaderboard" });
+    }
+  });
+
+  // Dynamic Unified Content Endpoint
+  app.get("/api/content", async (req, res) => {
+    try {
+      const [chapters, concepts, exercises, syllabi, islandQuestions] = await Promise.all([
+        getChapters(),
+        getConcepts(),
+        getExercises(),
+        getSyllabi(),
+        getIslandQuestions()
+      ]);
+      res.json({
+        chapters,
+        concepts,
+        exercises,
+        syllabi,
+        islandQuestions
+      });
+    } catch (error: any) {
+      console.error("API get /api/content failed:", error);
+      res.status(500).json({ error: error.message || "Failed to load dynamic content" });
+    }
+  });
+
+  // Content Administration/Management Endpoints
+  app.post("/api/content/chapter", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { id, data } = req.body;
+      if (!id || !data) {
+        return res.status(400).json({ error: "Missing parameters" });
+      }
+      await saveChapter(id, data);
+      res.json({ success: true, message: "Chapter saved successfully" });
+    } catch (error: any) {
+      console.error("API post /api/content/chapter failed:", error);
+      res.status(500).json({ error: error.message || "Failed to save chapter" });
+    }
+  });
+
+  app.post("/api/content/syllabus", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { chapterId, data } = req.body;
+      if (!chapterId || !data) {
+        return res.status(400).json({ error: "Missing parameters" });
+      }
+      await saveSyllabusChapter(chapterId, data);
+      res.json({ success: true, message: "Syllabus saved successfully" });
+    } catch (error: any) {
+      console.error("API post /api/content/syllabus failed:", error);
+      res.status(500).json({ error: error.message || "Failed to save syllabus" });
+    }
+  });
+
+  app.post("/api/content/question", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { id, data } = req.body;
+      if (!id || !data) {
+        return res.status(400).json({ error: "Missing parameters" });
+      }
+      await saveIslandQuestion(id, data);
+      res.json({ success: true, message: "Island question saved successfully" });
+    } catch (error: any) {
+      console.error("API post /api/content/question failed:", error);
+      res.status(500).json({ error: error.message || "Failed to save island question" });
+    }
+  });
+
+  app.post("/api/content/concept", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { id, data } = req.body;
+      if (!id || !data) {
+        return res.status(400).json({ error: "Missing parameters" });
+      }
+      await saveConcept(id, data);
+      res.json({ success: true, message: "Concept saved successfully" });
+    } catch (error: any) {
+      console.error("API post /api/content/concept failed:", error);
+      res.status(500).json({ error: error.message || "Failed to save concept" });
+    }
+  });
+
+  app.post("/api/content/exercise", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { id, data } = req.body;
+      if (!id || !data) {
+        return res.status(400).json({ error: "Missing parameters" });
+      }
+      await saveExercise(id, data);
+      res.json({ success: true, message: "Exercise saved successfully" });
+    } catch (error: any) {
+      console.error("API post /api/content/exercise failed:", error);
+      res.status(500).json({ error: error.message || "Failed to save exercise" });
     }
   });
 
@@ -132,8 +250,8 @@ async function startServer() {
         }
       });
 
-      // Retrieve full RAG contextualized system instruction compiled from the syllabus
-      const systemInstruction = getSyllabusContext();
+      // Retrieve full RAG contextualized system instruction compiled dynamically from the database
+      const systemInstruction = await getSyllabusContextDynamic();
 
       // Format messages strictly according to the GoogleGenAI contents schema
       const formattedContents = messages.map((msg: any) => ({

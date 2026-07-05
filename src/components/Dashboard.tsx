@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Chapter, UserState } from "../types";
-import { chapters, concepts } from "../lib/state";
+import { useContent } from "../lib/contentContext";
 import { 
   Heart, 
   Zap, 
@@ -175,6 +175,7 @@ export default function Dashboard({
   themeColor,
   setThemeColor
 }: DashboardProps) {
+  const { chapters, concepts } = useContent();
   const [selectedConcept, setSelectedConcept] = useState<any | null>(null);
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
 

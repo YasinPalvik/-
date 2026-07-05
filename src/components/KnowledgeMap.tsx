@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { concepts, chapters } from "../lib/state";
+import { useContent } from "../lib/contentContext";
 import { ConceptNode, UserState } from "../types";
 import { Award, Lock, BookOpen, CheckCircle, Info, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -10,6 +10,7 @@ interface KnowledgeMapProps {
 }
 
 export default function KnowledgeMap({ userState, onSelectConcept }: KnowledgeMapProps) {
+  const { chapters, concepts } = useContent();
   const [selectedConcept, setSelectedConcept] = useState<ConceptNode | null>(null);
 
   // Group concepts by chapter

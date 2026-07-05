@@ -1,11 +1,77 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User Profile Rules
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Global Study Hall Presence
+    match /study_hall_presence/{presenceId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(presenceId) && presenceId == request.auth.uid && isValidPresence(request.resource.data);
+      allow delete: if isSignedIn() && isValidId(presenceId) && presenceId == request.auth.uid;
+    }
+
+    function isValidPresence(data) {
+      return data.keys().hasAll(['fullName', 'topic', 'lastActive', 'isGuest'])
+        && data.keys().size() == 4
+        && data.fullName is string && data.fullName.size() <= 100
+        && data.topic is string && data.topic.size() <= 100
+        && data.isGuest is bool;
+    }
+
+    // Global Study Hall Questions
+    match /study_hall_questions/{questionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(questionId) && isValidQuestion(request.resource.data);
+      allow update: if isSignedIn() && isValidId(questionId) && isValidQuestion(request.resource.data) && (
+        resource.data.authorId == request.auth.uid
+      );
+      allow delete: if isSignedIn() && isValidId(questionId) && resource.data.authorId == request.auth.uid;
+    }
+
+    function isValidQuestion(data) {
+      return data.keys().hasAll(['topic', 'authorId', 'authorName', 'questionText', 'createdAt', 'status'])
+        && data.keys().size() == 6
+        && data.topic is string && data.topic.size() <= 100
+        && data.authorId is string && data.authorId == request.auth.uid
+        && data.authorName is string && data.authorName.size() <= 100
+        && data.questionText is string && data.questionText.size() <= 1000
+        && data.status is string && (data.status == 'open' || data.status == 'solved');
+    }
+
+    // Global Study Hall Answers
+    match /study_hall_questions/{questionId}/answers/{answerId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(questionId) && isValidId(answerId) && isValidAnswer(request.resource.data);
+      allow update: if isSignedIn() && isValidId(questionId) && isValidId(answerId) && isValidAnswer(request.resource.data) && resource.data.authorId == request.auth.uid;
+      allow delete: if isSignedIn() && isValidId(questionId) && isValidId(answerId) && resource.data.authorId == request.auth.uid;
+    }
+
+    function isValidAnswer(data) {
+      return data.keys().hasAll(['authorId', 'authorName', 'answerText', 'createdAt'])
+        && data.keys().size() == 4
+        && data.authorId is string && data.authorId == request.auth.uid
+        && data.authorName is string && data.authorName.size() <= 100
+        && data.answerText is string && data.answerText.size() <= 1000;
     }
   }
 }

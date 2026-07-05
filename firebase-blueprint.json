@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "StudyHallPresence": {
+      "title": "StudyHallPresence",
+      "description": "Represents an active student's presence and selected study topic in the Global Study Hall",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "description": "The full name or clinical nickname of the user" },
+        "topic": { "type": "string", "description": "The current subject ID they are studying" },
+        "lastActive": { "type": "string", "format": "date-time", "description": "Last presence ping timestamp" },
+        "isGuest": { "type": "boolean", "description": "Whether the student is a guest user" }
+      },
+      "required": ["fullName", "topic", "lastActive", "isGuest"]
+    },
+    "StudyHallQuestion": {
+      "title": "StudyHallQuestion",
+      "description": "Represents a collaborative medical Q&A thread in the Global Study Hall",
+      "type": "object",
+      "properties": {
+        "topic": { "type": "string", "description": "Subject category of the question" },
+        "authorId": { "type": "string", "description": "The Firebase UID or guest ID of the question author" },
+        "authorName": { "type": "string", "description": "Name of the author" },
+        "questionText": { "type": "string", "description": "The content of the clinical question" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the question was posted" },
+        "status": { "type": "string", "enum": ["open", "solved"], "description": "Current status of the question" }
+      },
+      "required": ["topic", "authorId", "authorName", "questionText", "createdAt", "status"]
+    },
+    "StudyHallAnswer": {
+      "title": "StudyHallAnswer",
+      "description": "An answer to a medical question in the study hall",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string", "description": "UID or guest ID of the responder" },
+        "authorName": { "type": "string", "description": "Name of the responder" },
+        "answerText": { "type": "string", "description": "The answer or clinical opinion" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the answer" }
+      },
+      "required": ["authorId", "authorName", "answerText", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/study_hall_presence/{presenceId}": {
+      "schema": "StudyHallPresence",
+      "description": "Realtime active presence registry for the Global Study Hall"
+    },
+    "/study_hall_questions/{questionId}": {
+      "schema": "StudyHallQuestion",
+      "description": "Collection of collaborative study questions"
+    },
+    "/study_hall_questions/{questionId}/answers/{answerId}": {
+      "schema": "StudyHallAnswer",
+      "description": "Subcollection of answers/solutions under a specific question"
+    }
+  }
+}

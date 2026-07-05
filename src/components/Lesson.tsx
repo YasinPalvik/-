@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ConceptNode, Exercise, UserState } from "../types";
-import { concepts, exercises, chapters } from "../lib/state";
+import { useContent } from "../lib/contentContext";
 import { 
   Heart, 
   Sparkles, 
@@ -26,7 +26,6 @@ import {
   AlertCircle 
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { syllabi } from "../data/syllabus";
 
 interface LessonProps {
   chapterId: string;
@@ -43,6 +42,7 @@ interface Slide {
 }
 
 export default function Lesson({ chapterId, isReview, userState, onLessonComplete, onLessonExit }: LessonProps) {
+  const { concepts, exercises, chapters, syllabi } = useContent();
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
   const [hearts, setHearts] = useState(userState.hearts);

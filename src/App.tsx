@@ -15,7 +15,8 @@ import SurgicalCertificate from "./components/SurgicalCertificate";
 import AntigravityCanvas from "./components/AntigravityCanvas";
 import MinooChat from "./components/MinooChat";
 import CurriculumPlanner from "./components/CurriculumPlanner";
-import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare, Compass } from "lucide-react";
+import GlobalStudyHall from "./components/GlobalStudyHall";
+import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare, Compass, Users } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -293,6 +294,24 @@ export default function App() {
                 </button>
 
                 <button
+                  onClick={() => { setCurrentView("studyhall"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    currentView === "studyhall"
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Users className="w-4 h-4 text-emerald-400" />
+                    <span>تالار مطالعه جهانی</span>
+                  </div>
+                  <span className="flex h-1.5 w-1.5 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                  </span>
+                </button>
+
+                <button
                   onClick={() => { setCurrentView("profile"); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     currentView === "profile"
@@ -415,7 +434,7 @@ export default function App() {
               <div className="text-right">
                 <span className="text-[10px] font-extrabold text-indigo-400 tracking-wide block">سامانه پایش پزشکان</span>
                 <h2 className="text-xs font-black text-white">
-                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "curriculum" ? "برنامه‌ریز درسی و صدور مدرک" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : "تنظیمات عمومی پرونده"}
+                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "curriculum" ? "برنامه‌ریز درسی و صدور مدرک" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : currentView === "studyhall" ? "تالار مطالعه بالینی جهانی" : "تنظیمات عمومی پرونده"}
                 </h2>
               </div>
             </div>
@@ -575,6 +594,24 @@ export default function App() {
                   userState={userState}
                   onUpdateState={handleUpdateState}
                   onNavigateHome={() => setCurrentView("dashboard")}
+                  idToken={idToken}
+                />
+              </motion.div>
+            )}
+
+            {/* Global Study Hall View */}
+            {currentView === "studyhall" && (
+              <motion.div
+                key="studyhall"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+              >
+                <GlobalStudyHall
+                  userState={userState}
+                  onUpdateState={handleUpdateState}
+                  themeColor={themeColor}
                 />
               </motion.div>
             )}

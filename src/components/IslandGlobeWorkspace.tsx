@@ -26,8 +26,8 @@ import {
   ArrowRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { syllabi } from "../data/syllabus";
-import { islandQuestionsData, IslandQuestion } from "../data/islandQuestions";
+import { useContent } from "../lib/contentContext";
+import { IslandQuestion } from "../data/islandQuestions";
 
 interface IslandGlobeWorkspaceProps {
   chapterId: string;
@@ -44,6 +44,7 @@ export default function IslandGlobeWorkspace({
   onExit,
   themeColor = "indigo"
 }: IslandGlobeWorkspaceProps) {
+  const { syllabi, islandQuestions: islandQuestionsData } = useContent();
   // Available islands list
   const islandsList = [
     { id: 1, name: "جزیره ۱: درسنامه تخصصی", desc: "کپسول‌های خلاصه درس و مرواریدهای حفظ جان بیمار", icon: BookOpen, color: "from-blue-600 to-indigo-700", glow: "shadow-blue-500/30" },
