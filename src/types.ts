@@ -65,4 +65,4 @@ export interface SubjectInfo {
   accentColor: string;
 }
 
-export type ViewType = "dashboard" | "lesson" | "result" | "profile" | "settings" | "curriculum" | "studyhall" | "cms";
+export type ViewType = "dashboard" | "lesson" | "result" | "profile";

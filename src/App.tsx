@@ -8,15 +8,10 @@ import Lesson from "./components/Lesson";
 import IslandGlobeWorkspace from "./components/IslandGlobeWorkspace";
 import Result from "./components/Result";
 import Profile from "./components/Profile";
-import Settings from "./components/Settings";
 import PremiumPortal from "./components/PremiumPortal";
 import AuthManager from "./components/AuthManager";
-import SurgicalCertificate from "./components/SurgicalCertificate";
 import AntigravityCanvas from "./components/AntigravityCanvas";
 import MinooChat from "./components/MinooChat";
-import CurriculumPlanner from "./components/CurriculumPlanner";
-import GlobalStudyHall from "./components/GlobalStudyHall";
-import CMSDashboard from "./components/CMSDashboard";
 import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare, Compass, Users } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -30,7 +25,6 @@ export default function App() {
   // Portal visibility states
   const [showPremium, setShowPremium] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [showCertificate, setShowCertificate] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
 
@@ -281,38 +275,6 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => { setCurrentView("curriculum"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    currentView === "curriculum"
-                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
-                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Compass className="w-4 h-4 text-indigo-400" />
-                    <span>برنامه‌ریز درسی و مدرک</span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => { setCurrentView("studyhall"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    currentView === "studyhall"
-                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
-                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Users className="w-4 h-4 text-emerald-400" />
-                    <span>تالار مطالعه جهانی</span>
-                  </div>
-                  <span className="flex h-1.5 w-1.5 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                  </span>
-                </button>
-
-                <button
                   onClick={() => { setCurrentView("profile"); setIsSidebarOpen(false); }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     currentView === "profile"
@@ -323,34 +285,6 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <User className="w-4 h-4" />
                     <span>پروفایل و آمار من</span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => { setCurrentView("settings"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    currentView === "settings"
-                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
-                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <SettingsIcon className="w-4 h-4" />
-                    <span>تنظیمات عمومی</span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => { setCurrentView("cms"); setIsSidebarOpen(false); }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    currentView === "cms"
-                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
-                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <BookMarked className="w-4 h-4 text-indigo-400" />
-                    <span>مدیریت محتوا (JSON CMS)</span>
                   </div>
                 </button>
               </nav>
@@ -375,14 +309,6 @@ export default function App() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                   </span>
-                </button>
-
-                <button
-                  onClick={() => { setShowCertificate(true); setIsSidebarOpen(false); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent transition-all"
-                >
-                  <AwardIcon className="w-4 h-4 text-emerald-400" />
-                  <span>مهر و گواهی‌نامه جراحی</span>
                 </button>
 
                 <button
@@ -449,7 +375,7 @@ export default function App() {
               <div className="text-right">
                 <span className="text-[10px] font-extrabold text-indigo-400 tracking-wide block">سامانه پایش پزشکان</span>
                 <h2 className="text-xs font-black text-white">
-                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "curriculum" ? "برنامه‌ریز درسی و صدور مدرک" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : currentView === "studyhall" ? "تالار مطالعه بالینی جهانی" : currentView === "cms" ? "سامانه یکپارچه مدیریت محتوا (CMS)" : "تنظیمات عمومی پرونده"}
+                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : "کارنامه و آمار من"}
                 </h2>
               </div>
             </div>
@@ -558,25 +484,6 @@ export default function App() {
               </motion.div>
             )}
 
-            {/* Curriculum Planner View */}
-            {currentView === "curriculum" && (
-              <motion.div
-                key="curriculum"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.2 }}
-              >
-                <CurriculumPlanner
-                  userState={userState}
-                  onStartLesson={handleStartLesson}
-                  onNavigateHome={() => setCurrentView("dashboard")}
-                  onTriggerCertificate={() => setShowCertificate(true)}
-                  onTriggerPremium={() => setShowPremium(true)}
-                />
-              </motion.div>
-            )}
-
             {/* User Profile View */}
             {currentView === "profile" && (
               <motion.div
@@ -590,60 +497,7 @@ export default function App() {
                   userState={userState}
                   onNavigateHome={() => setCurrentView("dashboard")}
                   onTriggerReview={() => handleStartLesson("review", true)}
-                  onTriggerCertificate={() => setShowCertificate(true)}
                   onTriggerPremium={() => setShowPremium(true)}
-                />
-              </motion.div>
-            )}
-
-            {/* Settings View */}
-            {currentView === "settings" && (
-              <motion.div
-                key="settings"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Settings
-                  userState={userState}
-                  onUpdateState={handleUpdateState}
-                  onNavigateHome={() => setCurrentView("dashboard")}
-                  idToken={idToken}
-                />
-              </motion.div>
-            )}
-
-            {/* Global Study Hall View */}
-            {currentView === "studyhall" && (
-              <motion.div
-                key="studyhall"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.2 }}
-              >
-                <GlobalStudyHall
-                  userState={userState}
-                  onUpdateState={handleUpdateState}
-                  themeColor={themeColor}
-                />
-              </motion.div>
-            )}
-
-            {/* CMS Dashboard View */}
-            {currentView === "cms" && (
-              <motion.div
-                key="cms"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.2 }}
-              >
-                <CMSDashboard
-                  userState={userState}
-                  onNavigateHome={() => setCurrentView("dashboard")}
-                  idToken={idToken}
                 />
               </motion.div>
             )}
@@ -678,12 +532,7 @@ export default function App() {
           />
         )}
 
-        {showCertificate && (
-          <SurgicalCertificate
-            userState={userState}
-            onClose={() => setShowCertificate(false)}
-          />
-        )}
+
       </AnimatePresence>
 
       {/* 🌌 Permanent Floating Medical AI Bubble */}

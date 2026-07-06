@@ -12,11 +12,10 @@ interface ProfileProps {
   userState: UserState;
   onNavigateHome: () => void;
   onTriggerReview: () => void;
-  onTriggerCertificate: () => void;
   onTriggerPremium: () => void;
 }
 
-export default function Profile({ userState, onNavigateHome, onTriggerReview, onTriggerCertificate, onTriggerPremium }: ProfileProps) {
+export default function Profile({ userState, onNavigateHome, onTriggerReview, onTriggerPremium }: ProfileProps) {
   const [activeWeakConceptId, setActiveWeakConceptId] = useState<string | null>(null);
   const [verificationSent, setVerificationSent] = useState(false);
   const [verificationError, setVerificationError] = useState("");
@@ -144,14 +143,10 @@ export default function Profile({ userState, onNavigateHome, onTriggerReview, on
 
           <div className="flex flex-wrap gap-3 shrink-0">
             {userState.isPremium ? (
-              <button
-                id="profile-cert-trigger"
-                onClick={onTriggerCertificate}
-                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs py-2.5 px-5 rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-2"
-              >
-                <Award className="w-4 h-4 fill-slate-950/20" />
-                <span>مشاهده و چاپ گواهی‌نامه جراحی</span>
-              </button>
+              <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-black text-xs py-2.5 px-5 rounded-xl flex items-center gap-2">
+                <Crown className="w-4 h-4 fill-emerald-500/10 animate-pulse" />
+                <span>پلن طلایی VIP پزشک فعال است</span>
+              </div>
             ) : (
               <div className="flex items-center gap-3">
                 <button
@@ -159,7 +154,7 @@ export default function Profile({ userState, onNavigateHome, onTriggerReview, on
                   className="bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs py-2.5 px-5 rounded-xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] flex items-center gap-1.5"
                 >
                   <Crown className="w-3.5 h-3.5 fill-slate-950/20 animate-pulse" />
-                  <span>ارتقای طلایی و فعال‌سازی گواهی‌نامه</span>
+                  <span>ارتقای طلایی VIP پرونده</span>
                 </button>
               </div>
             )}

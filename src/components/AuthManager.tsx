@@ -51,6 +51,8 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
         return "ایمیل یا کلمه عبور نادرست است.";
       case "auth/email-already-in-use":
         return "این ایمیل قبلاً ثبت‌نام شده است.";
+      case "auth/unauthorized-domain":
+        return "این دامنه در لیست دامنه‌های مجاز پروژه Firebase شما (sag-nazan) ثبت نشده است. لطفا دامنه‌های این برنامه را در بخش Authorized Domains فایربیس ثبت کنید.";
       case "auth/weak-password":
         return "کلمه عبور بسیار ضعیف است. باید حداقل ۶ کاراکتر باشد.";
       case "auth/invalid-email":
