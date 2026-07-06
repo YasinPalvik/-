@@ -85,6 +85,12 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
       ) {
         setShowSetupGuide("domains");
         setShowGooglePicker(true);
+      } else if (
+        e.code === "auth/network-request-failed" || 
+        (e.message && e.message.includes("network-request-failed"))
+      ) {
+        console.warn("Google Sign-In failed due to network request restriction or VPN filter. Loading sandbox fallback.");
+        setShowGooglePicker(true);
       } else if (e.code === "auth/popup-blocked") {
         setError("مرورگر پاپ‌آپ گوگل را مسدود کرده است. لطفاً از نوار آدرس دسترسی پاپ‌آپ را آزاد کرده یا برنامه را در یک 'تب جدید' باز کنید.");
       } else if (e.code === "auth/cancelled-popup-request") {
@@ -96,7 +102,9 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
         // Safe interactive fallback inside iframe
         setShowGooglePicker(true);
       } else {
-        setError(`خطا در اتصال به گوگل: ${e.message || "خطای ناشناخته فایربیس"}`);
+        // Fallback to sandbox if any other error prevents the popup from opening smoothly
+        console.warn("Google Sign-In encountered an error, loading sandbox picker fallback:", e);
+        setShowGooglePicker(true);
       }
     } finally {
       setIsLoading(false);
@@ -191,18 +199,25 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
       }, 1500);
     } catch (err: any) {
       console.error("Firebase email/password signup failed:", err);
-      // Seamlessly fall back if authentication methods are unconfigured/disallowed on this project
+      // Seamlessly fall back if authentication methods are unconfigured/disallowed on this project, or blocked by ISP/VPN network filters
       if (
         err.code === "auth/operation-not-allowed" || 
         err.code === "auth/unauthorized-domain" || 
-        (err.message && (err.message.includes("operation-not-allowed") || err.message.includes("restricted")))
+        err.code === "auth/network-request-failed" ||
+        (err.message && (
+          err.message.includes("operation-not-allowed") || 
+          err.message.includes("restricted") || 
+          err.message.includes("network-request-failed")
+        ))
       ) {
         if (err.code === "auth/unauthorized-domain") {
           setShowSetupGuide("domains");
+        } else if (err.code === "auth/network-request-failed") {
+          console.warn("Network error during signup, launching sandbox fallback.");
         } else {
           setShowSetupGuide("providers");
         }
-        console.warn("Firebase Auth is unconfigured. Launching sandbox fallback registration.");
+        console.warn("Firebase Auth is unconfigured or blocked by network/VPN. Launching sandbox fallback registration.");
         
         const accounts = getRegisteredAccounts();
         const cleanEmail = email.trim().toLowerCase();
@@ -304,18 +319,25 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
           onClose();
         }, 1500);
       } catch (loginErr: any) {
-        // Fallback if sign-in methods are disabled on the Firebase project
+        // Fallback if sign-in methods are disabled on the Firebase project or blocked by ISP/VPN network filters
         if (
           loginErr.code === "auth/operation-not-allowed" || 
           loginErr.code === "auth/unauthorized-domain" || 
-          (loginErr.message && (loginErr.message.includes("operation-not-allowed") || loginErr.message.includes("restricted")))
+          loginErr.code === "auth/network-request-failed" ||
+          (loginErr.message && (
+            loginErr.message.includes("operation-not-allowed") || 
+            loginErr.message.includes("restricted") || 
+            loginErr.message.includes("network-request-failed")
+          ))
         ) {
           if (loginErr.code === "auth/unauthorized-domain") {
             setShowSetupGuide("domains");
+          } else if (loginErr.code === "auth/network-request-failed") {
+            console.warn("Network error during login, launching sandbox fallback.");
           } else {
             setShowSetupGuide("providers");
           }
-          console.warn("Firebase Auth methods disabled. Using sandbox lookup.");
+          console.warn("Firebase Auth methods disabled or blocked by network/VPN. Using sandbox lookup.");
           const accounts = getRegisteredAccounts();
           const cleanEmail = email.trim().toLowerCase();
           
