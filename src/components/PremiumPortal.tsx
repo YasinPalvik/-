@@ -231,7 +231,7 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
                 </div>
                 <div className="space-y-1">
                   <h2 className="text-xl font-black text-slate-800 flex items-center justify-center gap-1.5">
-                    ارتقا به <span className="bg-gradient-to-l from-amber-600 to-yellow-500 bg-clip-text text-transparent">مدوفیل طلایی (Premium)</span>
+                    ارتقا به <span className="bg-gradient-to-l from-amber-600 to-yellow-500 bg-clip-text text-transparent">سگ نزن طلایی (Premium)</span>
                   </h2>
                   <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
                     با خرید اشتراک پرمیوم، تمام محدودیت‌های آموزشی را کنار بگذارید و به ابزارهای تحلیل تشخیصی فوق‌پیشرفته دسترسی پیدا کنید.
@@ -558,7 +558,7 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
 
               <div className="space-y-1">
                 <h3 className="text-base font-black text-slate-800">تراکنش با موفقیت انجام شد!</h3>
-                <p className="text-xs text-emerald-600 font-bold">حساب کاربری شما با موفقیت به مدوفیل طلایی ارتقا یافت 🌟</p>
+                <p className="text-xs text-emerald-600 font-bold">حساب کاربری شما با موفقیت به سگ نزن طلایی ارتقا یافت 🌟</p>
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-right space-y-3 max-w-sm mx-auto font-sans text-xs">

@@ -372,7 +372,7 @@ export default function Settings({ userState, onUpdateState, onNavigateHome, idT
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-black text-white">ارتقای پرونده به مدوفیل پرو (Premium)</h3>
+                    <h3 className="text-sm font-black text-white">ارتقای پرونده به سگ نزن پرو (Premium)</h3>
                     <p className="text-xs text-slate-300 leading-relaxed font-sans max-w-[80%]">
                       با ارتقا به نسخه پرو به برترین سناریوهای پاتولوژی حاد جراحی کشور، گواهی هوشمند و شبیه‌سازهای نجات جان بیمار دسترسی یابید.
                     </p>
@@ -420,7 +420,7 @@ export default function Settings({ userState, onUpdateState, onNavigateHome, idT
                 <div className="space-y-1.5">
                   <h4 className="text-sm font-black text-amber-300">نیاز به ورود به حساب کاربری</h4>
                   <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                    برای ثبت درسنامه‌ها یا نمونه‌سوالات جدید در دیتابیس ابری مستحکم مدوفیل، لطفاً ابتدا از دکمه «ورود به حساب کاربری» در منوی سایدبار استفاده نمایید تا احراز هویت شما تایید شود.
+                    برای ثبت درسنامه‌ها یا نمونه‌سوالات جدید در دیتابیس ابری مستحکم سگ نزن، لطفاً ابتدا از دکمه «ورود به حساب کاربری» در منوی سایدبار استفاده نمایید تا احراز هویت شما تایید شود.
                   </p>
                 </div>
               </div>
@@ -897,7 +897,7 @@ export default function Settings({ userState, onUpdateState, onNavigateHome, idT
                     style={{ animationDuration: "3s" }}
                   />
                 </div>
-                <h3 className="text-sm font-black">مدوفیل پرو (Medophil Pro)</h3>
+                <h3 className="text-sm font-black">سگ نزن پرو (Sag Nazan Pro)</h3>
                 <p className="text-[11px] text-indigo-300">حرفه‌ای‌ترین پلتفرم تعاملی یادگیری جراحی بالینی</p>
               </div>
 
@@ -915,7 +915,7 @@ export default function Settings({ userState, onUpdateState, onNavigateHome, idT
                   {userState.isPremium || proUpgradedSimulated ? (
                     <div className="text-center bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl space-y-2">
                       <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-                      <p className="text-xs font-extrabold text-emerald-300">اشتراک مدوفیل پرو برای شما فعال شد! 🎉</p>
+                      <p className="text-xs font-extrabold text-emerald-300">اشتراک سگ نزن پرو برای شما فعال شد! 🎉</p>
                       <p className="text-[10px] text-slate-400 font-medium font-sans">تمام قابلیت‌های پیشرفته هم‌اکنون به عنوان شبیه‌سازی MVP در دسترس شماست.</p>
                     </div>
                   ) : (

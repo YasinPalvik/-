@@ -73,5 +73,25 @@ service cloud.firestore {
         && data.authorName is string && data.authorName.size() <= 100
         && data.answerText is string && data.answerText.size() <= 1000;
     }
+
+    // Dynamic CMS and Learning Content collections (accessible via backend proxy)
+    match /chapters/{id} {
+      allow read, write: if true;
+    }
+    match /concepts/{id} {
+      allow read, write: if true;
+    }
+    match /exercises/{id} {
+      allow read, write: if true;
+    }
+    match /syllabus/{id} {
+      allow read, write: if true;
+    }
+    match /island_questions/{id} {
+      allow read, write: if true;
+    }
+    match /cms_items/{id} {
+      allow read, write: if true;
+    }
   }
 }

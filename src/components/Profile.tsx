@@ -5,6 +5,8 @@ import ProgressAnalytics from "./ProgressAnalytics";
 import Achievements from "./Achievements";
 import { Award, Zap, Flame, CheckCircle, ShieldAlert, Sparkles, BookOpen, AlertCircle, RefreshCw, X, HelpCircle, Heart, Crown, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { auth } from "../lib/firebase";
+import { sendEmailVerification } from "firebase/auth";
 
 interface ProfileProps {
   userState: UserState;
@@ -16,6 +18,9 @@ interface ProfileProps {
 
 export default function Profile({ userState, onNavigateHome, onTriggerReview, onTriggerCertificate, onTriggerPremium }: ProfileProps) {
   const [activeWeakConceptId, setActiveWeakConceptId] = useState<string | null>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
 
   // List of weak concepts based on errors
   const weakConceptList = Object.entries(userState.weakConcepts)
@@ -65,7 +70,7 @@ export default function Profile({ userState, onNavigateHome, onTriggerReview, on
             <div className="space-y-1 text-right">
               <div className="flex items-center gap-2.5">
                 <h3 className="text-base font-black text-slate-100">
-                  دکتر {userState.fullName || "کاربر مهمان مدوفیل"}
+                  دکتر {userState.fullName || "کاربر مهمان سگ نزن"}
                 </h3>
                 {userState.isPremium ? (
                   <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
@@ -79,8 +84,61 @@ export default function Profile({ userState, onNavigateHome, onTriggerReview, on
                 )}
               </div>
               <p className="text-[11px] text-slate-400 font-mono" dir="ltr">
-                {userState.email ? userState.email : "guest_surgeon@medophil.ir"}
+                {userState.email ? userState.email : "guest_surgeon@sagnazan.ir"}
               </p>
+              
+              {/* Real Firebase Email Verification Management */}
+              {auth.currentUser && auth.currentUser.providerData.some(p => p.providerId === "password") && (
+                <div className="mt-2 text-right">
+                  {auth.currentUser.emailVerified ? (
+                    <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                      <CheckCircle className="w-2.5 h-2.5 shrink-0" />
+                      <span>ایمیل تایید شده و فعال است</span>
+                    </span>
+                  ) : (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                          <AlertCircle className="w-2.5 h-2.5 shrink-0 animate-pulse" />
+                          <span>ایمیل هنوز تایید نشده است</span>
+                        </span>
+                        <button
+                          type="button"
+                          disabled={isSendingVerification}
+                          onClick={async () => {
+                            if (!auth.currentUser) return;
+                            setIsSendingVerification(true);
+                            setVerificationError("");
+                            setVerificationSent(false);
+                            try {
+                              await sendEmailVerification(auth.currentUser);
+                              setVerificationSent(true);
+                            } catch (err: any) {
+                              setVerificationError(err.message || "خطا در ارسال مجدد ایمیل تایید");
+                            } finally {
+                              setIsSendingVerification(false);
+                            }
+                          }}
+                          className="text-[9px] text-indigo-400 hover:text-indigo-300 font-black underline cursor-pointer active:scale-98 transition-transform"
+                        >
+                          {isSendingVerification ? "در حال ارسال..." : "ارسال مجدد لینک تایید"}
+                        </button>
+                      </div>
+                      
+                      {verificationSent && (
+                        <p className="text-[9px] text-emerald-400 font-medium">
+                          ✓ لینک تایید مجدداً با موفقیت ارسال شد. لطفاً پوشه Inbox و Spam خود را بررسی کنید.
+                        </p>
+                      )}
+                      {verificationError && (
+                        <p className="text-[9px] text-red-400 font-medium">
+                          ✗ خطا: {verificationError}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

@@ -61,6 +61,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
   // Sandbox / Simulation fallback states for unconfigured environment or restricted domains
   const [showGooglePicker, setShowGooglePicker] = useState(false);
   const [simulatedEmail, setSimulatedEmail] = useState<{ email: string; fullName: string; isForgot?: boolean } | null>(null);
+  const [showSetupGuide, setShowSetupGuide] = useState<"providers" | "domains" | null>(null);
 
   const handleGoogleSignIn = async () => {
     setError("");
@@ -75,12 +76,14 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
       }, 1500);
     } catch (e: any) {
       console.error("Google Sign-In failed", e);
-      if (
-        e.code === "auth/operation-not-allowed" || 
+      if (e.code === "auth/operation-not-allowed") {
+        setShowSetupGuide("providers");
+        setShowGooglePicker(true);
+      } else if (
         e.code === "auth/unauthorized-domain" || 
         (e.message && (e.message.includes("unauthorized-domain") || e.message.includes("unauthorized_client")))
       ) {
-        // Fallback gracefully to our elegant custom Mock Google Account Selector
+        setShowSetupGuide("domains");
         setShowGooglePicker(true);
       } else if (e.code === "auth/popup-blocked") {
         setError("مرورگر پاپ‌آپ گوگل را مسدود کرده است. لطفاً از نوار آدرس دسترسی پاپ‌آپ را آزاد کرده یا برنامه را در یک 'تب جدید' باز کنید.");
@@ -88,6 +91,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
         setError("درخواست ورود با گوگل به دلیل بسته‌شدن پنجره پاپ‌آپ توسط شما لغو شد.");
       } else if (e.code === "auth/auth-domain-config-required") {
         setError("پیکربندی دامنه مجاز (Authorized Domain) فایربیس ناقص است. لطفاً دامنه فعلی برنامه را در کنسول فایربیس ثبت کنید.");
+        setShowSetupGuide("domains");
       } else if (e.message && e.message.includes("iframe")) {
         // Safe interactive fallback inside iframe
         setShowGooglePicker(true);
@@ -193,6 +197,11 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
         err.code === "auth/unauthorized-domain" || 
         (err.message && (err.message.includes("operation-not-allowed") || err.message.includes("restricted")))
       ) {
+        if (err.code === "auth/unauthorized-domain") {
+          setShowSetupGuide("domains");
+        } else {
+          setShowSetupGuide("providers");
+        }
         console.warn("Firebase Auth is unconfigured. Launching sandbox fallback registration.");
         
         const accounts = getRegisteredAccounts();
@@ -301,6 +310,11 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
           loginErr.code === "auth/unauthorized-domain" || 
           (loginErr.message && (loginErr.message.includes("operation-not-allowed") || loginErr.message.includes("restricted")))
         ) {
+          if (loginErr.code === "auth/unauthorized-domain") {
+            setShowSetupGuide("domains");
+          } else {
+            setShowSetupGuide("providers");
+          }
           console.warn("Firebase Auth methods disabled. Using sandbox lookup.");
           const accounts = getRegisteredAccounts();
           const cleanEmail = email.trim().toLowerCase();
@@ -428,10 +442,10 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
         {/* Brand visual header */}
         <div className="text-center space-y-2 mb-6 pt-2">
           <div className="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-extrabold mx-auto shadow-sm">
-            <span className="text-xl">M</span>
+            <span className="text-xl">س</span>
           </div>
           <div>
-            <h3 className="text-sm font-black text-slate-800">ایجاد حساب کاربری مدوفیل</h3>
+            <h3 className="text-sm font-black text-slate-800">ایجاد حساب کاربری سگ نزن</h3>
             <p className="text-[10px] text-slate-400">ذخیره خودکار پیشرفت، آنالیز زنده و ارتقا به بخش طلایی</p>
           </div>
         </div>
@@ -730,7 +744,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
         </AnimatePresence>
 
         <p className="text-[9px] text-slate-400 text-center leading-relaxed mt-6 border-t pt-4">
-          👨‍⚕️ حساب کاربری مدوفیل به صورت محلی در مرورگر شما ذخیره و هماهنگ می‌شود تا بتوانید به راحتی MVP را تست، و داده‌های پیشرفت چندین کاربر را شبیه‌سازی کنید.
+          👨‍⚕️ حساب کاربری سگ نزن به صورت محلی در مرورگر شما ذخیره و هماهنگ می‌شود تا بتوانید به راحتی MVP را تست، و داده‌های پیشرفت چندین کاربر را شبیه‌سازی کنید.
         </p>
 
       </div>
@@ -755,7 +769,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
               </div>
-              <h3 className="text-sm font-black text-slate-800">انتخاب حساب گوگل (شبیه‌ساز مدوفیل)</h3>
+              <h3 className="text-sm font-black text-slate-800">انتخاب حساب گوگل (شبیه‌ساز سگ نزن)</h3>
               <p className="text-[10px] text-slate-400">به دلیل عدم دسترسی به کنسول فایربیس، ورود با گوگل در حالت ایمن Sandbox شبیه‌سازی شد.</p>
             </div>
 
@@ -763,7 +777,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
               {[
                 { email: "yasinbagherzadeh18@gmail.com", name: "یاسین باقرزاده" },
                 { email: "dr.rad@gmail.com", name: "دکتر مهران راد" },
-                { email: "medophile.test@gmail.com", name: "پزشک تستر مدوفیل" }
+                { email: "sagnazan.test@gmail.com", name: "پزشک تستر سگ نزن" }
               ].map((acc) => (
                 <button
                   key={acc.email}
@@ -822,7 +836,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
             <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span className="text-xs font-black tracking-wider">صندوق ورودی شبیه‌سازی شده مدوفیل</span>
+                <span className="text-xs font-black tracking-wider">صندوق ورودی شبیه‌سازی شده سگ نزن</span>
               </div>
               <button 
                 onClick={() => setSimulatedEmail(null)}
@@ -845,7 +859,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
               <p>
                 <span className="text-slate-400 font-bold ml-1.5 font-sans">موضوع:</span>
                 <span className="text-slate-900 font-black">
-                  {simulatedEmail.isForgot ? "بازنشانی کلمه عبور مدوفیل" : "تایید و فعال‌سازی حساب کاربری مدوفیل"}
+                  {simulatedEmail.isForgot ? "بازنشانی کلمه عبور سگ نزن" : "تایید و فعال‌سازی حساب کاربری سگ نزن"}
                 </span>
               </p>
             </div>
@@ -858,7 +872,7 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
                     M
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-800">خوش آمدید به مدوفیل</h4>
+                    <h4 className="text-xs font-black text-slate-800">خوش آمدید به سگ نزن</h4>
                     <p className="text-[9px] text-slate-400">سیستم مدیریت و پایش علمی پزشکان</p>
                   </div>
                 </div>
@@ -906,7 +920,112 @@ export default function AuthManager({ userState, onUpdateState, onClose }: AuthM
             </div>
 
             <div className="p-3 bg-slate-100 border-t border-slate-200 text-center text-[10px] text-slate-400 font-bold">
-              🖥️ شبیه‌ساز ارسال ایمیل مدوفیل - تضمین عملکرد ۱۰۰٪ آفلاین و آنلاین
+              🖥️ شبیه‌ساز ارسال ایمیل سگ نزن - تضمین عملکرد ۱۰۰٪ آفلاین و آنلاین
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 3. LIVE FIREBASE AUTH CONFIGURATION & ACTIVATION GUIDE */}
+      {showSetupGuide && (
+        <div className="fixed inset-0 z-[110] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300" dir="rtl">
+          <div className="bg-slate-900 border border-white/10 rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden text-right flex flex-col relative animate-in zoom-in duration-300">
+            
+            {/* Header */}
+            <div className="bg-slate-950 p-5 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
+                <span className="text-xs font-black text-slate-200">راهنمای راه‌اندازی ورود واقعی در فایربیس</span>
+              </div>
+              <button 
+                onClick={() => setShowSetupGuide(null)}
+                className="text-slate-400 hover:text-white p-1 hover:bg-white/5 rounded-full transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-5 text-xs text-slate-300 leading-relaxed overflow-y-auto max-h-[75vh]">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-amber-300 space-y-1.5">
+                <h4 className="font-extrabold flex items-center gap-1.5 text-amber-200">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>خطای عدم پیکربندی پروژه فایربیس</span>
+                </h4>
+                <p>
+                  شما در حال تلاش برای ثبت‌نام/ورود واقعی هستید، اما روش‌های ورود (Auth Providers) یا دامنه‌های مجاز در کنسول فایربیس شما هنوز فعال نشده‌اند.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Step 1 */}
+                <div className="space-y-2 border-r-2 border-indigo-500 pr-3">
+                  <h5 className="font-black text-white text-xs">۱. فعال‌سازی روش‌های ورود (Email و Google)</h5>
+                  <p className="text-slate-400 text-[11px]">
+                    لطفاً وارد بخش تنظیمات ورود کنسول فایربیس خود شده و گزینه‌های <strong>Email/Password</strong> و <strong>Google</strong> را فعال کنید:
+                  </p>
+                  <a 
+                    href="https://console.firebase.google.com/project/tenacious-timing-9pxzt/authentication/providers" 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black px-3.5 py-1.5 rounded-xl transition-all text-[11px] mt-1"
+                  >
+                    <span>پنل فعال‌سازی روش‌های ورود ↗</span>
+                  </a>
+                </div>
+
+                {/* Step 2 */}
+                <div className="space-y-2 border-r-2 border-indigo-500 pr-3">
+                  <h5 className="font-black text-white text-xs">۲. افزودن دامنه‌های برنامه به لیست مجاز (Authorized Domains)</h5>
+                  <p className="text-slate-400 text-[11px]">
+                    برای اینکه گوگل و فایربیس اجازه ثبت‌نام به این دامنه را بدهند، لطفاً دامنه‌های زیر را به بخش Settings - Authorized Domains اضافه کنید:
+                  </p>
+                  
+                  <div className="bg-slate-950 p-3 rounded-xl space-y-1.5 border border-white/5 font-mono text-[10px] text-slate-300 select-all text-left" dir="ltr">
+                    <div>localhost</div>
+                    <div>ais-dev-2ezqcl6362ip43inzzrvtt-976477654756.europe-west2.run.app</div>
+                    <div>ais-pre-2ezqcl6362ip43inzzrvtt-976477654756.europe-west2.run.app</div>
+                  </div>
+
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText("localhost\nais-dev-2ezqcl6362ip43inzzrvtt-976477654756.europe-west2.run.app\nais-pre-2ezqcl6362ip43inzzrvtt-976477654756.europe-west2.run.app");
+                        alert("دامنه‌ها با موفقیت در کلیپ‌بورد کپی شدند.");
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 font-bold px-3 py-1.5 rounded-xl transition-all text-[10px]"
+                    >
+                      کپی کردن دامنه‌ها
+                    </button>
+
+                    <a 
+                      href="https://console.firebase.google.com/project/tenacious-timing-9pxzt/authentication/settings" 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-300 font-bold px-3 py-1.5 rounded-xl transition-all text-[10px]"
+                    >
+                      <span>تنظیمات دامنه‌های مجاز ↗</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-white/5">
+                <p className="text-[10px] text-slate-400">
+                  💡 <strong>نکته:</strong> هم‌اکنون به عنوان جایگزین موقت تا قبل از فعال‌سازی پنل فایربیس خود، ما ثبت‌نام شبیه‌سازی شده و کاملاً پایدار را برای شما لود کرده‌ایم تا پروژه شما هرگز متوقف نگردد. به محض فعال‌سازی گزینه‌های فوق در کنسول فایربیس، این بخش به صورت ۱۰۰٪ عملیاتی و اتوماتیک به سیستم ایمیل و ورود فایربیس متصل خواهد شد.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-950 p-4 border-t border-white/5 text-center">
+              <button 
+                onClick={() => setShowSetupGuide(null)}
+                className="bg-gradient-to-tr from-amber-500 to-yellow-500 text-slate-950 font-black text-xs px-6 py-2.5 rounded-xl transition-all active:scale-98"
+              >
+                متوجه شدم، انتقال به شبیه‌ساز آفلاین
+              </button>
             </div>
 
           </div>

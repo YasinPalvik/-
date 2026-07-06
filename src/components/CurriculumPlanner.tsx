@@ -164,7 +164,7 @@ export default function CurriculumPlanner({
               )}
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-              با یادگیری مفاهیم {getSubjectName(activeSubjectId)} و افزایش امتیاز بالینی، شرایط لازم برای دریافت گواهی‌نامه صلاحیت پزشکی {getSubjectName(activeSubjectId)} مدوفیل را تکمیل نمایید.
+              با یادگیری مفاهیم {getSubjectName(activeSubjectId)} و افزایش امتیاز بالینی، شرایط لازم برای دریافت گواهی‌نامه صلاحیت پزشکی {getSubjectName(activeSubjectId)} سگ نزن را تکمیل نمایید.
             </p>
           </div>
 

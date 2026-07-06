@@ -16,6 +16,7 @@ import AntigravityCanvas from "./components/AntigravityCanvas";
 import MinooChat from "./components/MinooChat";
 import CurriculumPlanner from "./components/CurriculumPlanner";
 import GlobalStudyHall from "./components/GlobalStudyHall";
+import CMSDashboard from "./components/CMSDashboard";
 import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare, Compass, Users } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -243,10 +244,10 @@ export default function App() {
               <div className="flex items-center justify-between pb-6 border-b border-white/5">
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setCurrentView("dashboard"); setIsSidebarOpen(false); }}>
                   <div className="w-10 h-10 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-extrabold shadow-[0_0_15px_rgba(99,102,241,0.3)]">
-                    <span className="text-lg">M</span>
+                    <span className="text-lg">س</span>
                   </div>
                   <div>
-                    <h1 className="text-sm font-black text-white leading-none">مدوفیل</h1>
+                    <h1 className="text-sm font-black text-white leading-none">سگ نزن</h1>
                     <span className="text-[9px] text-indigo-400 font-extrabold tracking-wider uppercase">آموزش جراحی بالینی</span>
                   </div>
                 </div>
@@ -336,6 +337,20 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <SettingsIcon className="w-4 h-4" />
                     <span>تنظیمات عمومی</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => { setCurrentView("cms"); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    currentView === "cms"
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <BookMarked className="w-4 h-4 text-indigo-400" />
+                    <span>مدیریت محتوا (JSON CMS)</span>
                   </div>
                 </button>
               </nav>
@@ -434,7 +449,7 @@ export default function App() {
               <div className="text-right">
                 <span className="text-[10px] font-extrabold text-indigo-400 tracking-wide block">سامانه پایش پزشکان</span>
                 <h2 className="text-xs font-black text-white">
-                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "curriculum" ? "برنامه‌ریز درسی و صدور مدرک" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : currentView === "studyhall" ? "تالار مطالعه بالینی جهانی" : "تنظیمات عمومی پرونده"}
+                  {currentView === "dashboard" ? "داشبورد مطالعاتی" : currentView === "curriculum" ? "برنامه‌ریز درسی و صدور مدرک" : currentView === "profile" ? "کارنامه و گواهی‌نامه‌ها" : currentView === "studyhall" ? "تالار مطالعه بالینی جهانی" : currentView === "cms" ? "سامانه یکپارچه مدیریت محتوا (CMS)" : "تنظیمات عمومی پرونده"}
                 </h2>
               </div>
             </div>
@@ -616,13 +631,30 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* CMS Dashboard View */}
+            {currentView === "cms" && (
+              <motion.div
+                key="cms"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.2 }}
+              >
+                <CMSDashboard
+                  userState={userState}
+                  onNavigateHome={() => setCurrentView("dashboard")}
+                  idToken={idToken}
+                />
+              </motion.div>
+            )}
+
           </AnimatePresence>
         </main>
 
         {/* Global Footer (Frosted Glassmorphic layout) */}
         {currentView !== "lesson" && currentView !== "result" && (
           <footer className="border-t border-white/5 py-6 px-4 md:px-8 text-center text-[11px] text-slate-500 font-medium">
-            <p className="font-sans">مدوفیل (Medophil) © {new Date().getFullYear()} - پلتفرم هوشمند جراحی بالینی به سبک گیمیفاید</p>
+            <p className="font-sans">سگ نزن (Sag Nazan) © {new Date().getFullYear()} - پلتفرم هوشمند جراحی بالینی به سبک گیمیفاید</p>
             <p className="text-[10px] text-slate-600 mt-1">تلفیق تجارب آموزشی و هوش محاسباتی برای ارتقای سلامت جامعه</p>
           </footer>
         )}

@@ -1,5 +1,5 @@
 {
-  "name": "Medophil",
+  "name": "سگ نزن",
   "description": "پلتفرم گیمیفاید هاب یادگیری و شبیه‌سازی دروس بالینی پزشکی شامل جراحی عمومی، قلب و عروق، کودکان، زنان و زایمان و داروشناسی بالینی",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

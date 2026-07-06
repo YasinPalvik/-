@@ -286,7 +286,7 @@ export default function Dashboard({
   return (
     <div className="space-y-8" dir="rtl">
       
-      {/* Medophil Headquarter & Medical Specialty Learning Hub Banner */}
+      {/* Sag Nazan Headquarter & Medical Specialty Learning Hub Banner */}
       <div className="bg-gradient-to-r from-indigo-950/80 via-slate-900/60 to-purple-950/80 border border-white/10 p-6 rounded-[32px] relative overflow-hidden shadow-2xl">
         <div className="absolute right-0 top-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-[80px]" />
         <div className="absolute left-10 top-1/2 -translate-y-1/2 w-28 h-28 hidden md:block select-none pointer-events-none">
@@ -311,12 +311,12 @@ export default function Dashboard({
           <div className="flex-1 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="bg-indigo-500 text-white font-black text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
-                🎓 آکادمی جامع شبیه‌سازی بالینی مدوفیل
+                🎓 آکادمی جامع شبیه‌سازی بالینی سگ نزن
               </span>
               <span className="text-[10px] text-indigo-300 font-extrabold font-mono">هاب یکپارچه یادگیری دروس پزشکی</span>
             </div>
             <h2 className="text-xl font-black text-white leading-snug">
-              خوش آمدید، همکار بالینی! به هاب جامع یادگیری و شبیه‌سازی پزشکی مدوفیل خوش آمدید 🩺
+              خوش آمدید، همکار بالینی! به هاب جامع یادگیری و شبیه‌سازی پزشکی سگ نزن خوش آمدید 🩺
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
               با تمرین‌های شبیه‌سازی بالینی پیشرفته و متد تکرار فاصله‌دار، مهارت‌های پزشکی خود را در دپارتمان‌های مختلف ارتقا داده و تصمیم‌گیری بالینی چابک را در محیطی تعاملی تمرین کنید!
@@ -869,7 +869,7 @@ export default function Dashboard({
                     <TrendingUp className="w-4 h-4 text-indigo-400" />
                     رده‌بندی پزشکان بالینی
                   </h3>
-                  <p className="text-[9px] text-slate-400">لیست برترین دانشجویان مدوفیل</p>
+                  <p className="text-[9px] text-slate-400">لیست برترین دانشجویان سگ نزن</p>
                 </div>
                 <div className="w-8 h-8 shrink-0">
                   <img 

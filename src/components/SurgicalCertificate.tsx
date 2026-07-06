@@ -9,7 +9,7 @@ interface SurgicalCertificateProps {
 }
 
 export default function SurgicalCertificate({ userState, onClose }: SurgicalCertificateProps) {
-  const [userName, setUserName] = useState(userState.fullName || "پزشک کارآموز مدوفیل");
+  const [userName, setUserName] = useState(userState.fullName || "پزشک کارآموز سگ نزن");
   const [isSaved, setIsSaved] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +95,7 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                   <div className="w-10 h-10 border-2 border-amber-800/30 rounded-full flex items-center justify-center text-amber-800/80">
                     <Award className="w-6 h-6 fill-amber-50" />
                   </div>
-                  <span className="text-[9px] font-black text-amber-900 tracking-widest">MEDOPHIL</span>
+                  <span className="text-[9px] font-black text-amber-900 tracking-widest">SAG NAZAN</span>
                 </div>
 
                 <div className="text-left space-y-0.5">
@@ -124,7 +124,7 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                   </h3>
 
                   <p className="text-xs text-slate-600 leading-relaxed max-w-lg mx-auto font-sans text-justify">
-                    با طی نمودن موفقیت‌آمیز دوره‌های پیشرفته آموزش بالینی {getSubjectName(activeSubjectId)}، شبیه‌سازی سناریوهای بحرانی پرخطر (High-Stakes)، پایش دقیق علائم تشخیصی و کنترل کامل جان‌های بالینی در بیمارستان شبیه‌ساز <strong>مدوفیل</strong>، شایستگی علمی و تصمیم‌گیری چابک خود را در سطح متخصصان طراز اول با بالاترین نمره تایید نموده‌اند.
+                    با طی نمودن موفقیت‌آمیز دوره‌های پیشرفته آموزش بالینی {getSubjectName(activeSubjectId)}، شبیه‌سازی سناریوهای بحرانی پرخطر (High-Stakes)، پایش دقیق علائم تشخیصی و کنترل کامل جان‌های بالینی در بیمارستان شبیه‌ساز <strong>سگ نزن</strong>، شایستگی علمی و تصمیم‌گیری چابک خود را در سطح متخصصان طراز اول با بالاترین نمره تایید نموده‌اند.
                   </p>
                 </div>
               </div>
@@ -146,12 +146,12 @@ export default function SurgicalCertificate({ userState, onClose }: SurgicalCert
                     <Sparkles className="w-5 h-5" />
                     <div className="absolute inset-0 border border-amber-500 rounded-full scale-90 border-dashed"></div>
                   </div>
-                  <span className="text-[7px] text-amber-800/80 font-bold block mt-1">مهر رسمی شبیه‌ساز مدوفیل</span>
+                  <span className="text-[7px] text-amber-800/80 font-bold block mt-1">مهر رسمی شبیه‌ساز سگ نزن</span>
                 </div>
 
                 {/* Sign 2 */}
                 <div className="text-center space-y-1">
-                  <span className="text-[8px] text-slate-400 block">ریاست بورد پزشکی مدوفیل</span>
+                  <span className="text-[8px] text-slate-400 block">ریاست بورد پزشکی سگ نزن</span>
                   <div className="w-20 h-6 border-b border-amber-800/20 border-dotted mx-auto flex items-center justify-center">
                     <span className="text-[9px] text-indigo-600 font-serif italic">دکتر باقرزاده</span>
                   </div>

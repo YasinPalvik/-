@@ -1,9 +1,11 @@
-import { adminDb } from '../lib/firebase-admin.ts';
+import { adminDb as db } from '../lib/firebase-admin.ts';
 import { Chapter, ConceptNode, Exercise } from '../types.ts';
 import { chapters as localChapters, concepts as localConcepts, exercises as localExercises } from '../lib/state.ts';
 import { syllabi as localSyllabi, ChapterSyllabus } from '../data/syllabus.ts';
 import { extendedSyllabi } from '../data/content_extended.ts';
 import { islandQuestionsData as localIslandQuestions, IslandQuestion } from '../data/islandQuestions.ts';
+import fs from 'fs';
+import path from 'path';
 
 // Combine all local static syllabi
 const mergedLocalSyllabi: Record<string, ChapterSyllabus> = {
@@ -17,28 +19,171 @@ for (const [chId, qList] of Object.entries(localIslandQuestions)) {
   qList.forEach(q => {
     flattenedLocalQuestions.push({
       ...q,
-      // Ensure chapterId is stored
       id: q.id || `${chId}_${q.islandId}_${Math.random().toString(36).substring(2, 7)}`
     });
   });
 }
 
 /**
+ * Standard CMS Content Item Structure
+ */
+export interface CMSContentItem {
+  id: string;
+  title: string;
+  difficulty: "easy" | "medium" | "hard";
+  tags: string[];
+  content_type: "lesson" | "question";
+  data: any;
+}
+
+/**
+ * Helper to fetch and merge all CMS items from local JSON and Firestore
+ */
+export async function getAllCmsItems(): Promise<CMSContentItem[]> {
+  const items: CMSContentItem[] = [];
+
+  // 1. Load from local static JSON cms_content.json
+  try {
+    const jsonPath = path.join(process.cwd(), 'src', 'data', 'cms_content.json');
+    if (fs.existsSync(jsonPath)) {
+      const fileData = fs.readFileSync(jsonPath, 'utf-8');
+      const parsed = JSON.parse(fileData) as CMSContentItem[];
+      items.push(...parsed);
+    }
+  } catch (err) {
+    console.error("Failed to read local cms_content.json:", err);
+  }
+
+  // 2. Load from Firestore cms_items collection using Admin SDK
+  try {
+    const snap = await db.collection('cms_items').get();
+    if (!snap.empty) {
+      snap.forEach(docSnap => {
+        const item = { id: docSnap.id, ...docSnap.data() } as CMSContentItem;
+        const existingIdx = items.findIndex(x => x.id === item.id);
+        if (existingIdx !== -1) {
+          items[existingIdx] = item; // override local with Firestore
+        } else {
+          items.push(item);
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Failed to read cms_items from Firestore:", err);
+  }
+
+  return items;
+}
+
+/**
+ * Dynamic CMS Parsers
+ */
+export async function getCmsChapters(): Promise<Chapter[]> {
+  const items = await getAllCmsItems();
+  return items
+    .filter(item => item.content_type === "lesson")
+    .map(item => ({
+      id: item.id,
+      title: item.title,
+      description: item.data?.overview || ""
+    }));
+}
+
+export async function getCmsSyllabi(): Promise<Record<string, ChapterSyllabus>> {
+  const items = await getAllCmsItems();
+  const syllabi: Record<string, ChapterSyllabus> = {};
+  items
+    .filter(item => item.content_type === "lesson")
+    .forEach(item => {
+      syllabi[item.id] = {
+        chapterId: item.id,
+        overview: item.data?.overview || item.title,
+        sections: item.data?.sections || [],
+        pitfalls: item.data?.pitfalls || [],
+        combinedPearls: item.data?.combinedPearls || []
+      };
+    });
+  return syllabi;
+}
+
+export async function getCmsConcepts(): Promise<ConceptNode[]> {
+  const items = await getAllCmsItems();
+  return items
+    .filter(item => item.content_type === "lesson")
+    .map(item => ({
+      id: `${item.id}_concept`,
+      chapterId: item.id,
+      title: `مفاهیم کلیدی: ${item.title}`,
+      definition: item.data?.overview || item.title,
+      bloomLevel: item.difficulty === "hard" ? "analysis" : item.difficulty === "medium" ? "comprehension" : "recall",
+      prerequisites: [],
+      highStakes: true,
+      distractors: ["تله تشخیصی اشتباه", "عدم ارزیابی علائم حیاتی"],
+      narrativeHook: item.data?.overview
+    }));
+}
+
+export async function getCmsExercises(): Promise<Exercise[]> {
+  const items = await getAllCmsItems();
+  return items
+    .filter(item => item.content_type === "question")
+    .map(item => ({
+      id: item.id,
+      conceptId: `${item.data?.chapterId || "cardio_ch1"}_concept`,
+      type: item.data?.type || "multipleChoice",
+      prompt: item.title,
+      options: item.data?.options || [],
+      correctAnswer: item.data?.correctAnswer || "",
+      explanationCorrect: item.data?.explanationCorrect || "پاسخ صحیح بالینی",
+      explanationWrong: item.data?.explanationWrong || ""
+    }));
+}
+
+export async function getCmsIslandQuestions(): Promise<Record<string, IslandQuestion[]>> {
+  const items = await getAllCmsItems();
+  const qMap: Record<string, IslandQuestion[]> = {};
+
+  items
+    .filter(item => item.content_type === "question")
+    .forEach(item => {
+      const chId = item.data?.chapterId || "cardio_ch1";
+      const islandId = item.data?.islandId || 2;
+      const q: IslandQuestion = {
+        id: item.id,
+        islandId,
+        islandName: islandId === 3 ? "جزیره ۳: سناریوهای بالینی (Clinical Cases)" : "جزیره ۲: سوالات موشکافانه آموزشی",
+        question: item.title,
+        options: item.data?.options || [],
+        correctIndex: item.data?.options && item.data?.correctAnswer ? item.data.options.indexOf(item.data.correctAnswer) : 0,
+        reasoning: item.data?.explanationCorrect || "پاسخ صحیح بالینی",
+        clinicalPearls: item.data?.explanationWrong || "نکته علمی مربوط به سوال",
+        syllabusLinkSectionIdx: 0,
+        syllabusLinkName: "بخش آموزشی درسنامه"
+      };
+
+      if (q.correctIndex === -1) q.correctIndex = 0;
+
+      if (!qMap[chId]) qMap[chId] = [];
+      qMap[chId].push(q);
+    });
+
+  return qMap;
+}
+
+/**
  * Seeds content to Firestore if the collections are empty.
- * This guarantees zero downtime and automatically populates the Firestore database
- * with the entire rich medical curriculum on first launch.
  */
 export async function seedContentIfEmpty() {
   try {
     console.log("Checking if dynamic content needs to be seeded...");
 
     // 1. Seed Chapters
-    const chaptersSnap = await adminDb.collection('chapters').limit(1).get();
+    const chaptersSnap = await db.collection('chapters').limit(1).get();
     if (chaptersSnap.empty) {
       console.log(`Seeding ${localChapters.length} chapters to Firestore...`);
-      const batch = adminDb.batch();
+      const batch = db.batch();
       localChapters.forEach(ch => {
-        const docRef = adminDb.collection('chapters').doc(ch.id);
+        const docRef = db.collection('chapters').doc(ch.id);
         batch.set(docRef, ch);
       });
       await batch.commit();
@@ -46,15 +191,14 @@ export async function seedContentIfEmpty() {
     }
 
     // 2. Seed Concepts
-    const conceptsSnap = await adminDb.collection('concepts').limit(1).get();
+    const conceptsSnap = await db.collection('concepts').limit(1).get();
     if (conceptsSnap.empty) {
       console.log(`Seeding ${localConcepts.length} concepts to Firestore...`);
-      // Since concepts can be many, let's batch them in groups of 200
       const chunks = chunkArray(localConcepts, 200);
       for (const chunk of chunks) {
-        const batch = adminDb.batch();
+        const batch = db.batch();
         chunk.forEach(concept => {
-          const docRef = adminDb.collection('concepts').doc(concept.id);
+          const docRef = db.collection('concepts').doc(concept.id);
           batch.set(docRef, concept);
         });
         await batch.commit();
@@ -63,14 +207,14 @@ export async function seedContentIfEmpty() {
     }
 
     // 3. Seed Exercises
-    const exercisesSnap = await adminDb.collection('exercises').limit(1).get();
+    const exercisesSnap = await db.collection('exercises').limit(1).get();
     if (exercisesSnap.empty) {
       console.log(`Seeding ${localExercises.length} exercises to Firestore...`);
       const chunks = chunkArray(localExercises, 200);
       for (const chunk of chunks) {
-        const batch = adminDb.batch();
+        const batch = db.batch();
         chunk.forEach(ex => {
-          const docRef = adminDb.collection('exercises').doc(ex.id);
+          const docRef = db.collection('exercises').doc(ex.id);
           batch.set(docRef, ex);
         });
         await batch.commit();
@@ -79,13 +223,13 @@ export async function seedContentIfEmpty() {
     }
 
     // 4. Seed Syllabi (lessons)
-    const syllabusSnap = await adminDb.collection('syllabus').limit(1).get();
+    const syllabusSnap = await db.collection('syllabus').limit(1).get();
     if (syllabusSnap.empty) {
       const syllabiList = Object.values(mergedLocalSyllabi);
       console.log(`Seeding ${syllabiList.length} syllabus capsules to Firestore...`);
-      const batch = adminDb.batch();
+      const batch = db.batch();
       syllabiList.forEach(syllabus => {
-        const docRef = adminDb.collection('syllabus').doc(syllabus.chapterId);
+        const docRef = db.collection('syllabus').doc(syllabus.chapterId);
         batch.set(docRef, syllabus);
       });
       await batch.commit();
@@ -93,14 +237,14 @@ export async function seedContentIfEmpty() {
     }
 
     // 5. Seed Island Questions
-    const questionsSnap = await adminDb.collection('island_questions').limit(1).get();
+    const questionsSnap = await db.collection('island_questions').limit(1).get();
     if (questionsSnap.empty) {
       console.log(`Seeding ${flattenedLocalQuestions.length} island questions to Firestore...`);
       const chunks = chunkArray(flattenedLocalQuestions, 200);
       for (const chunk of chunks) {
-        const batch = adminDb.batch();
+        const batch = db.batch();
         chunk.forEach(q => {
-          const docRef = adminDb.collection('island_questions').doc(q.id);
+          const docRef = db.collection('island_questions').doc(q.id);
           batch.set(docRef, q);
         });
         await batch.commit();
@@ -124,109 +268,165 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 }
 
 /**
- * Retrieves all chapters, merging Firestore data with local fallbacks.
+ * Retrieves all chapters, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getChapters(): Promise<Chapter[]> {
   try {
-    const snap = await adminDb.collection('chapters').get();
-    if (snap.empty) return localChapters;
+    const snap = await db.collection('chapters').get();
     const items: Chapter[] = [];
-    snap.forEach(doc => {
-      items.push(doc.data() as Chapter);
-    });
-    return items;
+    if (snap.empty) {
+      items.push(...localChapters);
+    } else {
+      snap.forEach(docSnap => {
+        items.push(docSnap.data() as Chapter);
+      });
+    }
+    const cmsItems = await getCmsChapters();
+    const combined = [...items, ...cmsItems];
+    // Ensure uniqueness of chapters by ID
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
   } catch (e) {
     console.error("Failed to fetch chapters from Firestore, returning local data:", e);
-    return localChapters;
+    const cmsItems = await getCmsChapters().catch(() => []);
+    const combined = [...localChapters, ...cmsItems];
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
   }
 }
 
 /**
- * Retrieves all concepts, merging Firestore data with local fallbacks.
+ * Retrieves all concepts, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getConcepts(): Promise<ConceptNode[]> {
   try {
-    const snap = await adminDb.collection('concepts').get();
-    if (snap.empty) return localConcepts;
+    const snap = await db.collection('concepts').get();
     const items: ConceptNode[] = [];
-    snap.forEach(doc => {
-      items.push(doc.data() as ConceptNode);
-    });
-    return items;
+    if (snap.empty) {
+      items.push(...localConcepts);
+    } else {
+      snap.forEach(docSnap => {
+        items.push(docSnap.data() as ConceptNode);
+      });
+    }
+    const cmsItems = await getCmsConcepts();
+    const combined = [...items, ...cmsItems];
+    // Ensure uniqueness of concepts by ID
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
   } catch (e) {
     console.error("Failed to fetch concepts from Firestore, returning local data:", e);
-    return localConcepts;
+    const cmsItems = await getCmsConcepts().catch(() => []);
+    const combined = [...localConcepts, ...cmsItems];
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
   }
 }
 
 /**
- * Retrieves all exercises, merging Firestore data with local fallbacks.
+ * Retrieves all exercises, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getExercises(): Promise<Exercise[]> {
   try {
-    const snap = await adminDb.collection('exercises').get();
-    if (snap.empty) return localExercises;
+    const snap = await db.collection('exercises').get();
     const items: Exercise[] = [];
-    snap.forEach(doc => {
-      items.push(doc.data() as Exercise);
-    });
-    return items;
+    if (snap.empty) {
+      items.push(...localExercises);
+    } else {
+      snap.forEach(docSnap => {
+        items.push(docSnap.data() as Exercise);
+      });
+    }
+    const cmsItems = await getCmsExercises();
+    const combined = [...items, ...cmsItems];
+    // Ensure uniqueness of exercises by ID
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
   } catch (e) {
     console.error("Failed to fetch exercises from Firestore, returning local data:", e);
-    return localExercises;
+    const cmsItems = await getCmsExercises().catch(() => []);
+    const combined = [...localExercises, ...cmsItems];
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
   }
 }
 
 /**
- * Retrieves all syllabi (lessons), merging Firestore data with local fallbacks.
+ * Retrieves all syllabi (lessons), merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getSyllabi(): Promise<Record<string, ChapterSyllabus>> {
   try {
-    const snap = await adminDb.collection('syllabus').get();
-    if (snap.empty) return mergedLocalSyllabi;
+    const snap = await db.collection('syllabus').get();
     const res: Record<string, ChapterSyllabus> = {};
-    snap.forEach(doc => {
-      const data = doc.data() as ChapterSyllabus;
-      res[doc.id] = data;
-    });
-    return res;
+    if (snap.empty) {
+      Object.assign(res, mergedLocalSyllabi);
+    } else {
+      snap.forEach(docSnap => {
+        res[docSnap.id] = docSnap.data() as ChapterSyllabus;
+      });
+    }
+    const cmsItems = await getCmsSyllabi();
+    return { ...res, ...cmsItems };
   } catch (e) {
     console.error("Failed to fetch syllabi from Firestore, returning local data:", e);
-    return mergedLocalSyllabi;
+    const cmsItems = await getCmsSyllabi().catch(() => ({}));
+    return { ...mergedLocalSyllabi, ...cmsItems };
   }
 }
 
 /**
- * Retrieves all island questions, merging Firestore data with local fallbacks.
+ * Retrieves all island questions, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getIslandQuestions(): Promise<Record<string, IslandQuestion[]>> {
   try {
-    const snap = await adminDb.collection('island_questions').get();
-    if (snap.empty) return localIslandQuestions;
+    const snap = await db.collection('island_questions').get();
     const res: Record<string, IslandQuestion[]> = {};
-    
-    snap.forEach(doc => {
-      const data = doc.data() as IslandQuestion;
-      // Derive chapterId from the question ID (e.g., ch1_isl2_q1 -> ch1) or use doc fields if we add it
-      let chId = "ch1";
-      if (data.id && data.id.includes("_")) {
-        chId = data.id.split("_")[0];
-      }
-      if (!res[chId]) {
-        res[chId] = [];
-      }
-      res[chId].push(data);
-    });
 
-    // Make sure we sort them by islandId for correct learning path!
+    if (snap.empty) {
+      Object.assign(res, localIslandQuestions);
+    } else {
+      snap.forEach(docSnap => {
+        const data = docSnap.data() as IslandQuestion;
+        let chId = "ch1";
+        if (data.id && data.id.includes("_")) {
+          chId = data.id.split("_")[0];
+        }
+        if (!res[chId]) {
+          res[chId] = [];
+        }
+        res[chId].push(data);
+      });
+    }
+
+    const cmsItems = await getCmsIslandQuestions();
+    for (const [chId, qList] of Object.entries(cmsItems)) {
+      if (!res[chId]) res[chId] = [];
+      res[chId].push(...qList);
+    }
+
+    // Sort by islandId and guarantee uniqueness within each chapter!
     for (const chId in res) {
-      res[chId].sort((a, b) => a.islandId - b.islandId);
+      const uniqueQs = Array.from(new Map(res[chId].map(q => [q.id || `${chId}_${q.islandId}_${q.question.substring(0, 5)}`, q])).values());
+      uniqueQs.sort((a, b) => a.islandId - b.islandId);
+      res[chId] = uniqueQs;
     }
 
     return res;
   } catch (e) {
     console.error("Failed to fetch island questions from Firestore, returning local data:", e);
-    return localIslandQuestions;
+    const res = { ...localIslandQuestions };
+    const cmsItems = await getCmsIslandQuestions().catch(() => ({}));
+    for (const [chId, qList] of Object.entries(cmsItems)) {
+      if (!res[chId]) res[chId] = [];
+      res[chId].push(...qList);
+    }
+    // Sort by islandId and guarantee uniqueness within each chapter!
+    for (const chId in res) {
+      const uniqueQs = Array.from(new Map(res[chId].map(q => [q.id || `${chId}_${q.islandId}_${q.question.substring(0, 5)}`, q])).values());
+      uniqueQs.sort((a, b) => a.islandId - b.islandId);
+      res[chId] = uniqueQs;
+    }
+    return res;
   }
 }
 
@@ -234,33 +434,40 @@ export async function getIslandQuestions(): Promise<Record<string, IslandQuestio
  * Saves/Edits a Syllabus Chapter in Firestore.
  */
 export async function saveSyllabusChapter(chapterId: string, data: ChapterSyllabus) {
-  await adminDb.collection('syllabus').doc(chapterId).set(data, { merge: true });
+  await db.collection('syllabus').doc(chapterId).set(data, { merge: true });
 }
 
 /**
  * Saves/Edits an Island Question in Firestore.
  */
 export async function saveIslandQuestion(questionId: string, data: IslandQuestion) {
-  await adminDb.collection('island_questions').doc(questionId).set(data, { merge: true });
+  await db.collection('island_questions').doc(questionId).set(data, { merge: true });
 }
 
 /**
  * Saves/Edits a Chapter in Firestore.
  */
 export async function saveChapter(chapterId: string, data: Chapter) {
-  await adminDb.collection('chapters').doc(chapterId).set(data, { merge: true });
+  await db.collection('chapters').doc(chapterId).set(data, { merge: true });
 }
 
 /**
  * Saves/Edits a Concept in Firestore.
  */
 export async function saveConcept(conceptId: string, data: ConceptNode) {
-  await adminDb.collection('concepts').doc(conceptId).set(data, { merge: true });
+  await db.collection('concepts').doc(conceptId).set(data, { merge: true });
 }
 
 /**
  * Saves/Edits an Exercise in Firestore.
  */
 export async function saveExercise(exerciseId: string, data: Exercise) {
-  await adminDb.collection('exercises').doc(exerciseId).set(data, { merge: true });
+  await db.collection('exercises').doc(exerciseId).set(data, { merge: true });
+}
+
+/**
+ * Saves/Edits a generic standard CMS Item in Firestore.
+ */
+export async function saveCmsItem(id: string, data: any) {
+  await db.collection('cms_items').doc(id).set(data, { merge: true });
 }

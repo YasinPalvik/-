@@ -18,7 +18,9 @@ import {
   saveIslandQuestion,
   saveChapter,
   saveConcept,
-  saveExercise
+  saveExercise,
+  saveCmsItem,
+  getAllCmsItems
 } from "./src/db/content.ts";
 
 // Helper function to build a comprehensive dynamic RAG syllabus context for Gemini
@@ -113,6 +115,31 @@ async function startServer() {
     } catch (error: any) {
       console.error("API get /api/content failed:", error);
       res.status(500).json({ error: error.message || "Failed to load dynamic content" });
+    }
+  });
+
+  // Standard JSON-based CMS Endpoints
+  app.get("/api/cms/items", async (req, res) => {
+    try {
+      const items = await getAllCmsItems();
+      res.json(items);
+    } catch (error: any) {
+      console.error("API get /api/cms/items failed:", error);
+      res.status(500).json({ error: error.message || "Failed to retrieve CMS items" });
+    }
+  });
+
+  app.post("/api/cms/item", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { id, title, difficulty, tags, content_type, data } = req.body;
+      if (!id || !title || !difficulty || !tags || !content_type) {
+        return res.status(400).json({ error: "فیلدهای id, title, difficulty, tags, content_type الزامی هستند." });
+      }
+      await saveCmsItem(id, { id, title, difficulty, tags, content_type, data });
+      res.json({ success: true, message: "آیتم استاندارد JSON با موفقیت در CMS ذخیره شد." });
+    } catch (error: any) {
+      console.error("API post /api/cms/item failed:", error);
+      res.status(500).json({ error: error.message || "خطا در ذخیره آیتم CMS" });
     }
   });
 

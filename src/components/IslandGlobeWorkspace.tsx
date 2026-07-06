@@ -248,7 +248,7 @@ export default function IslandGlobeWorkspace({
             <div className="text-right">
               <span className="text-[10px] text-indigo-400 font-extrabold flex items-center gap-1">
                 <Compass className="w-3 h-3 animate-spin" />
-                دپارتمان آموزش‌های بالینی مدوفیل
+                دپارتمان آموزش‌های بالینی سگ نزن
               </span>
               <h2 className="text-sm font-black text-white">
                 {selectedIslandId ? (
@@ -295,7 +295,7 @@ export default function IslandGlobeWorkspace({
               <div className="text-center max-w-3xl mx-auto space-y-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-full text-[10px] font-black">
                   <Globe className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>کیهان یادگیری بالینی مدوفیل</span>
+                  <span>کیهان یادگیری بالینی سگ نزن</span>
                 </div>
                 <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">
                   سیاره شبیه‌سازی مبحث <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-rose-400">شرح حال و معاینه جراحی</span> 🩺

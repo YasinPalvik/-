@@ -393,7 +393,7 @@ export default function Lesson({ chapterId, isReview, userState, onLessonComplet
           <div className="space-y-3 relative z-10 text-right">
             <div className="flex items-center gap-2">
               <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider">
-                کلاس درس جراحی مدوفیل
+                کلاس درس جراحی سگ نزن
               </span>
               <span className="bg-slate-900 border border-white/5 text-slate-400 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold">
                 صفحه {syllabusPage + 1} از {totalSyllabusPages}

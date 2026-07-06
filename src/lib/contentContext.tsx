@@ -31,9 +31,15 @@ interface ContentContextType {
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 export function ContentProvider({ children }: { children: React.ReactNode }) {
-  const [chapters, setChapters] = useState<Chapter[]>(fallbackChapters);
-  const [concepts, setConcepts] = useState<ConceptNode[]>(fallbackConcepts);
-  const [exercises, setExercises] = useState<Exercise[]>(fallbackExercises);
+  const [chapters, setChapters] = useState<Chapter[]>(() => {
+    return Array.from(new Map(fallbackChapters.map(ch => [ch.id, ch])).values());
+  });
+  const [concepts, setConcepts] = useState<ConceptNode[]>(() => {
+    return Array.from(new Map(fallbackConcepts.map(c => [c.id, c])).values());
+  });
+  const [exercises, setExercises] = useState<Exercise[]>(() => {
+    return Array.from(new Map(fallbackExercises.map(e => [e.id, e])).values());
+  });
   const [syllabi, setSyllabi] = useState<Record<string, ChapterSyllabus>>(initialFallbackSyllabi);
   const [islandQuestions, setIslandQuestions] = useState<Record<string, IslandQuestion[]>>(fallbackIslandQuestions);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,9 +49,18 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
       const cached = localStorage.getItem("medophil_dynamic_content");
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed.chapters) setChapters(parsed.chapters);
-        if (parsed.concepts) setConcepts(parsed.concepts);
-        if (parsed.exercises) setExercises(parsed.exercises);
+        if (parsed.chapters) {
+          const uniqueChapters = Array.from(new Map(parsed.chapters.map((ch: any) => [ch.id, ch])).values());
+          setChapters(uniqueChapters);
+        }
+        if (parsed.concepts) {
+          const uniqueConcepts = Array.from(new Map(parsed.concepts.map((c: any) => [c.id, c])).values());
+          setConcepts(uniqueConcepts);
+        }
+        if (parsed.exercises) {
+          const uniqueExercises = Array.from(new Map(parsed.exercises.map((e: any) => [e.id, e])).values());
+          setExercises(uniqueExercises);
+        }
         if (parsed.syllabi) setSyllabi(parsed.syllabi);
         if (parsed.islandQuestions) setIslandQuestions(parsed.islandQuestions);
       }
@@ -61,9 +76,18 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         
         // Update states
-        if (data.chapters) setChapters(data.chapters);
-        if (data.concepts) setConcepts(data.concepts);
-        if (data.exercises) setExercises(data.exercises);
+        if (data.chapters) {
+          const uniqueChapters = Array.from(new Map(data.chapters.map((ch: any) => [ch.id, ch])).values());
+          setChapters(uniqueChapters);
+        }
+        if (data.concepts) {
+          const uniqueConcepts = Array.from(new Map(data.concepts.map((c: any) => [c.id, c])).values());
+          setConcepts(uniqueConcepts);
+        }
+        if (data.exercises) {
+          const uniqueExercises = Array.from(new Map(data.exercises.map((e: any) => [e.id, e])).values());
+          setExercises(uniqueExercises);
+        }
         if (data.syllabi) setSyllabi(data.syllabi);
         if (data.islandQuestions) setIslandQuestions(data.islandQuestions);
 
