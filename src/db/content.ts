@@ -24,6 +24,28 @@ for (const [chId, qList] of Object.entries(localIslandQuestions)) {
   });
 }
 
+let isDatabaseUnconfigured = false;
+
+function handleFirestoreError(e: any, contextMsg: string) {
+  const errMsg = e?.message || String(e);
+  if (
+    errMsg.includes("PERMISSION_DENIED") ||
+    errMsg.includes("permission-denied") ||
+    errMsg.includes("Missing or insufficient permissions") ||
+    errMsg.includes("Cloud Firestore API has not been used") ||
+    e?.code === "permission-denied" ||
+    e?.code === 7
+  ) {
+    if (!isDatabaseUnconfigured) {
+      isDatabaseUnconfigured = true;
+      console.warn(`\n[Firestore Status] ⚠️ database is currently unconfigured or requires rules update. Switching to local-first fallback mode gracefully.`);
+      console.warn(`To enable cloud data persistence on your personal project "sag-nazan", please visit your Firebase Console -> Firestore Database -> Rules tab, and paste the contents of the "firestore.rules" file.\n`);
+    }
+  } else {
+    console.warn(`${contextMsg}:`, errMsg);
+  }
+}
+
 /**
  * Standard CMS Content Item Structure
  */
@@ -54,6 +76,10 @@ export async function getAllCmsItems(): Promise<CMSContentItem[]> {
     console.error("Failed to read local cms_content.json:", err);
   }
 
+  if (isDatabaseUnconfigured) {
+    return items;
+  }
+
   // 2. Load from Firestore cms_items collection using Admin SDK
   try {
     const snap = await db.collection('cms_items').get();
@@ -69,7 +95,7 @@ export async function getAllCmsItems(): Promise<CMSContentItem[]> {
       });
     }
   } catch (err) {
-    console.error("Failed to read cms_items from Firestore:", err);
+    handleFirestoreError(err, "Failed to read cms_items from Firestore");
   }
 
   return items;
@@ -174,6 +200,9 @@ export async function getCmsIslandQuestions(): Promise<Record<string, IslandQues
  * Seeds content to Firestore if the collections are empty.
  */
 export async function seedContentIfEmpty() {
+  if (isDatabaseUnconfigured) {
+    return;
+  }
   try {
     console.log("Checking if dynamic content needs to be seeded...");
 
@@ -254,7 +283,7 @@ export async function seedContentIfEmpty() {
 
     console.log("Dynamic content sync and seeding check completed successfully!");
   } catch (error) {
-    console.error("Failed to seed content to Firestore:", error);
+    handleFirestoreError(error, "Failed to seed content to Firestore");
   }
 }
 
@@ -271,6 +300,12 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
  * Retrieves all chapters, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getChapters(): Promise<Chapter[]> {
+  if (isDatabaseUnconfigured) {
+    const cmsItems = await getCmsChapters().catch(() => []);
+    const combined = [...localChapters, ...cmsItems];
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
+  }
   try {
     const snap = await db.collection('chapters').get();
     const items: Chapter[] = [];
@@ -287,7 +322,7 @@ export async function getChapters(): Promise<Chapter[]> {
     const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
     return unique;
   } catch (e) {
-    console.error("Failed to fetch chapters from Firestore, returning local data:", e);
+    handleFirestoreError(e, "Failed to fetch chapters from Firestore, returning local data");
     const cmsItems = await getCmsChapters().catch(() => []);
     const combined = [...localChapters, ...cmsItems];
     const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
@@ -299,6 +334,12 @@ export async function getChapters(): Promise<Chapter[]> {
  * Retrieves all concepts, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getConcepts(): Promise<ConceptNode[]> {
+  if (isDatabaseUnconfigured) {
+    const cmsItems = await getCmsConcepts().catch(() => []);
+    const combined = [...localConcepts, ...cmsItems];
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
+  }
   try {
     const snap = await db.collection('concepts').get();
     const items: ConceptNode[] = [];
@@ -315,7 +356,7 @@ export async function getConcepts(): Promise<ConceptNode[]> {
     const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
     return unique;
   } catch (e) {
-    console.error("Failed to fetch concepts from Firestore, returning local data:", e);
+    handleFirestoreError(e, "Failed to fetch concepts from Firestore, returning local data");
     const cmsItems = await getCmsConcepts().catch(() => []);
     const combined = [...localConcepts, ...cmsItems];
     const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
@@ -327,6 +368,12 @@ export async function getConcepts(): Promise<ConceptNode[]> {
  * Retrieves all exercises, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getExercises(): Promise<Exercise[]> {
+  if (isDatabaseUnconfigured) {
+    const cmsItems = await getCmsExercises().catch(() => []);
+    const combined = [...localExercises, ...cmsItems];
+    const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+    return unique;
+  }
   try {
     const snap = await db.collection('exercises').get();
     const items: Exercise[] = [];
@@ -343,7 +390,7 @@ export async function getExercises(): Promise<Exercise[]> {
     const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
     return unique;
   } catch (e) {
-    console.error("Failed to fetch exercises from Firestore, returning local data:", e);
+    handleFirestoreError(e, "Failed to fetch exercises from Firestore, returning local data");
     const cmsItems = await getCmsExercises().catch(() => []);
     const combined = [...localExercises, ...cmsItems];
     const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
@@ -355,6 +402,10 @@ export async function getExercises(): Promise<Exercise[]> {
  * Retrieves all syllabi (lessons), merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getSyllabi(): Promise<Record<string, ChapterSyllabus>> {
+  if (isDatabaseUnconfigured) {
+    const cmsItems = await getCmsSyllabi().catch(() => ({}));
+    return { ...mergedLocalSyllabi, ...cmsItems };
+  }
   try {
     const snap = await db.collection('syllabus').get();
     const res: Record<string, ChapterSyllabus> = {};
@@ -368,7 +419,7 @@ export async function getSyllabi(): Promise<Record<string, ChapterSyllabus>> {
     const cmsItems = await getCmsSyllabi();
     return { ...res, ...cmsItems };
   } catch (e) {
-    console.error("Failed to fetch syllabi from Firestore, returning local data:", e);
+    handleFirestoreError(e, "Failed to fetch syllabi from Firestore, returning local data");
     const cmsItems = await getCmsSyllabi().catch(() => ({}));
     return { ...mergedLocalSyllabi, ...cmsItems };
   }
@@ -378,6 +429,20 @@ export async function getSyllabi(): Promise<Record<string, ChapterSyllabus>> {
  * Retrieves all island questions, merging Firestore data with local fallbacks and dynamic CMS standard items.
  */
 export async function getIslandQuestions(): Promise<Record<string, IslandQuestion[]>> {
+  if (isDatabaseUnconfigured) {
+    const res = { ...localIslandQuestions };
+    const cmsItems = await getCmsIslandQuestions().catch(() => ({}));
+    for (const [chId, qList] of Object.entries(cmsItems)) {
+      if (!res[chId]) res[chId] = [];
+      res[chId].push(...qList);
+    }
+    for (const chId in res) {
+      const uniqueQs = Array.from(new Map(res[chId].map(q => [q.id || `${chId}_${q.islandId}_${q.question.substring(0, 5)}`, q])).values());
+      uniqueQs.sort((a, b) => a.islandId - b.islandId);
+      res[chId] = uniqueQs;
+    }
+    return res;
+  }
   try {
     const snap = await db.collection('island_questions').get();
     const res: Record<string, IslandQuestion[]> = {};
@@ -413,7 +478,7 @@ export async function getIslandQuestions(): Promise<Record<string, IslandQuestio
 
     return res;
   } catch (e) {
-    console.error("Failed to fetch island questions from Firestore, returning local data:", e);
+    handleFirestoreError(e, "Failed to fetch island questions from Firestore, returning local data");
     const res = { ...localIslandQuestions };
     const cmsItems = await getCmsIslandQuestions().catch(() => ({}));
     for (const [chId, qList] of Object.entries(cmsItems)) {

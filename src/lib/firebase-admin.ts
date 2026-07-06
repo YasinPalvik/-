@@ -24,7 +24,9 @@ export const adminAuth = getAdminAuth(adminApp);
 
 // Client Firestore initialization for robust backend query bypass (handling IAM permission errors on named databases)
 const clientApp = initClientApp(firebaseConfig);
-const clientDb = getClientFirestore(clientApp, firebaseConfig.firestoreDatabaseId);
+const clientDb = firebaseConfig.firestoreDatabaseId
+  ? getClientFirestore(clientApp, firebaseConfig.firestoreDatabaseId)
+  : getClientFirestore(clientApp);
 
 class DocumentReferenceWrapper {
   constructor(public firestoreDoc: any) {}

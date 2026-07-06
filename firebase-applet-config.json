@@ -1,10 +1,10 @@
 {
-  "projectId": "tenacious-timing-9pxzt",
-  "appId": "1:956225734399:web:7b1809cab825746b76aeca",
-  "apiKey": "AIzaSyDhtZH9DoZVxnl5gD5gpA2BIlpQvZghtUE",
-  "authDomain": "tenacious-timing-9pxzt.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-medophil-9960c511-4535-4866-8aed-ae1d75db4058",
-  "storageBucket": "tenacious-timing-9pxzt.firebasestorage.app",
-  "messagingSenderId": "956225734399",
-  "measurementId": ""
+  "projectId": "sag-nazan",
+  "appId": "1:807752775643:web:8658c5e80435a0bf5819fe",
+  "apiKey": "AIzaSyB7BFTIuovrpHTEvBEmLpu_ox8yGta1ZAk",
+  "authDomain": "sag-nazan.firebaseapp.com",
+  "storageBucket": "sag-nazan.firebasestorage.app",
+  "messagingSenderId": "807752775643",
+  "measurementId": "G-G8LYBCYXH0",
+  "firestoreDatabaseId": "(default)"
 }
