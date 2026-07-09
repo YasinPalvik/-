@@ -38,6 +38,26 @@ export default function App() {
 
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
+  const [paymentStep, setPaymentStep] = useState<"landing" | "checkout" | "receipt" | "admin">("landing");
+  const [paymentRefId, setPaymentRefId] = useState<string | null>(null);
+
+  // Parse callback redirects from Zarinpal on initial load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get("payment");
+    const refId = params.get("refId");
+
+    if (paymentStatus === "success") {
+      setPaymentStep("receipt");
+      setPaymentRefId(refId);
+      setShowPremium(true);
+      // Clean query parameters from URL for cleanliness
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === "failed") {
+      alert("⚠️ پرداخت شما لغو شد یا با خطا مواجه گردید. در صورت کسر وجه، مبلغ ظرف ۷۲ ساعت آینده به حساب شما بازخواهد گشت.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Sync auth state and load user state from database
   useEffect(() => {
@@ -537,7 +557,14 @@ export default function App() {
           <PremiumPortal
             userState={userState}
             onUpdateState={handleUpdateState}
-            onClose={() => setShowPremium(false)}
+            onClose={() => {
+              setShowPremium(false);
+              setPaymentStep("landing");
+              setPaymentRefId(null);
+            }}
+            idToken={idToken}
+            initialStep={paymentStep}
+            paymentRefId={paymentRefId}
           />
         )}
 

@@ -24,12 +24,15 @@ import {
   User
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { verifyActivationCode, generatePremiumPassword, generateActivationCode } from "../lib/premium_verifier";
+import { generatePremiumPassword, generateActivationCode } from "../lib/premium_verifier";
 
 interface PremiumPortalProps {
   userState: UserState;
   onUpdateState: (newState: UserState) => void;
   onClose: () => void;
+  idToken: string | null;
+  initialStep?: "landing" | "checkout" | "receipt" | "admin";
+  paymentRefId?: string | null;
 }
 
 interface StoredAccount {
@@ -41,14 +44,19 @@ interface StoredAccount {
 
 const STORAGE_ACCOUNTS_KEY = "medophil_registered_accounts";
 
-export default function PremiumPortal({ userState, onUpdateState, onClose }: PremiumPortalProps) {
-  const [step, setStep] = useState<"landing" | "checkout" | "receipt" | "admin">("landing");
+export default function PremiumPortal({ 
+  userState, 
+  onUpdateState, 
+  onClose,
+  idToken,
+  initialStep = "landing",
+  paymentRefId = null
+}: PremiumPortalProps) {
+  const [step, setStep] = useState<"landing" | "checkout" | "receipt" | "admin">(initialStep);
   
-  // Custom Payment State
-  const [copied, setCopied] = useState(false);
-  const [activationCode, setActivationCode] = useState("");
-  const [activationError, setActivationError] = useState("");
-  const [activationSuccess, setActivationSuccess] = useState("");
+  // Zarinpal Payment State
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
   
   // Admin State
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -65,7 +73,6 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
   const [searchQuery, setSearchQuery] = useState("");
   const [adminCopied, setAdminCopied] = useState("");
 
-  const CARD_NUMBER = "6104338962519225";
   const AMOUNT_TOMAN = "۴۹,۰۰۰";
   const TELEGRAM_ID = "Yasin_Bagherzadeh";
 
@@ -89,48 +96,42 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
     }
   }, [step]);
 
-  const handleCopyCard = () => {
-    navigator.clipboard.writeText(CARD_NUMBER);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleApplyCode = () => {
-    setActivationError("");
-    setActivationSuccess("");
-
-    if (!activationCode.trim()) {
-      setActivationError("لطفاً کد فعال‌سازی خود را وارد کنید.");
-      return;
-    }
-
-    if (!userState.email) {
-      setActivationError("ابتدا باید از منوی بالا عضو شوید یا وارد حساب خود شوید تا این کد روی ایمیل شما ثبت گردد.");
-      return;
-    }
-
-    // Check activation code validity
-    const isValid = verifyActivationCode(userState.email, activationCode);
-    if (!isValid) {
-      setActivationError("کد فعال‌سازی نامعتبر است یا برای ایمیل دیگری صادر شده است.");
-      return;
-    }
-
-    // Success! Update local and global states
-    const updatedState: UserState = {
-      ...userState,
-      isPremium: true,
-      hearts: 5,
-      planType: "lifetime",
-      subscriptionDate: new Date().toISOString().split("T")[0]
-    };
-
-    onUpdateState(updatedState);
-    setActivationSuccess("تبریک! کد فعال‌سازی طلایی اعمال شد و دسترسی کامل شما باز گردید 🌟");
+  const handleInitiateZarinpal = async () => {
+    setPaymentError("");
     
-    setTimeout(() => {
-      setStep("receipt");
-    }, 1500);
+    if (!idToken) {
+      setPaymentError("ابتدا باید از منوی بالای صفحه وارد حساب کاربری خود شوید تا خرید به نام شما ثبت شود.");
+      return;
+    }
+
+    setLoadingPayment(true);
+    try {
+      const response = await fetch("/api/zarinpal/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        }
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || "خطا در ایجاد تراکنش پرداخت");
+      }
+
+      const data = await response.json();
+      if (data.url) {
+        // Redirect browser to Zarinpal secure payment URL or mock gateway
+        window.location.href = data.url;
+      } else {
+        throw new Error("آدرس درگاه پرداخت یافت نشد.");
+      }
+    } catch (err: any) {
+      console.error("Zarinpal trigger error:", err);
+      setPaymentError(err.message || "برقراری ارتباط با درگاه پرداخت با خطا مواجه شد. لطفاً دوباره تلاش کنید.");
+    } finally {
+      setLoadingPayment(false);
+    }
   };
 
   const handleAdminAuth = (e: React.FormEvent) => {
@@ -373,7 +374,7 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
             </motion.div>
           )}
 
-          {/* STEP 2: REAL MANUAL CHECKOUT */}
+          {/* STEP 2: ONLINE ZARINPAL CHECKOUT */}
           {step === "checkout" && (
             <motion.div
               key="checkout"
@@ -385,12 +386,12 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
               {/* Header with back navigation */}
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                  <div className="w-9 h-9 bg-yellow-100 text-amber-600 rounded-xl flex items-center justify-center">
                     <CreditCard className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-slate-800">پرداخت کارت‌به‌کارت و فعال‌سازی دستی</h3>
-                    <p className="text-[10px] text-slate-400">بدون نیاز به ثبت اطلاعات حساس کارت بانکی</p>
+                    <h3 className="text-sm font-black text-slate-800">اتصال به درگاه بانکی زرین‌پال</h3>
+                    <p className="text-[10px] text-slate-400">پرداخت امن و آنی با تمامی کارت‌های عضو شتاب</p>
                   </div>
                 </div>
 
@@ -403,142 +404,65 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
                 </button>
               </div>
 
-              {/* Steps visual flow */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                {/* Right side: Bank Card Info */}
-                <div className="space-y-4">
-                  <div className="bg-gradient-to-tr from-slate-900 to-slate-800 text-white p-5 rounded-[24px] shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[160px]">
-                    <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
-                    
-                    <div className="flex justify-between items-start">
-                      <span className="text-[10px] font-black tracking-widest text-slate-300">بانک ملت</span>
-                      <Crown className="w-6 h-6 text-amber-400 fill-amber-400/20" />
-                    </div>
+              {/* Checkout details card */}
+              <div className="space-y-6 max-w-md mx-auto">
+                <div className="bg-gradient-to-tr from-slate-900 to-slate-800 text-white p-6 rounded-[28px] shadow-xl relative overflow-hidden space-y-4">
+                  <div className="absolute -top-10 -left-10 w-32 h-32 bg-yellow-500/10 rounded-full blur-xl"></div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black tracking-widest text-slate-300">طرح عضویت طلایی مادام‌العمر</span>
+                    <Crown className="w-6 h-6 text-amber-400 fill-amber-400/20" />
+                  </div>
 
-                    <div className="space-y-1 my-3">
-                      <span className="text-[9px] text-slate-400 block">شماره کارت جهت واریز:</span>
-                      <div className="flex items-center justify-between gap-2 bg-slate-950/40 px-3 py-2 rounded-xl border border-white/5">
-                        <span className="text-sm md:text-base font-black tracking-wider font-mono text-amber-300">
-                          6104  3389  6251  9225
-                        </span>
-                        
-                        <button
-                          onClick={handleCopyCard}
-                          className="p-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-slate-200 transition-all active:scale-95"
-                          title="کپی شماره کارت"
-                        >
-                          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
+                  <div className="space-y-3 pt-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-400">حساب کاربری:</span>
+                      <span className="font-bold text-slate-100">{userState.fullName || "پزشک میهمان"}</span>
                     </div>
-
-                    <div className="flex justify-between items-center pt-2">
-                      <div className="text-right">
-                        <span className="text-[9px] text-slate-400 block">نام گیرنده:</span>
-                        <span className="text-xs font-extrabold text-white">یاسین باقرزاده</span>
-                      </div>
-                      <div className="text-left">
-                        <span className="text-[9px] text-slate-400 block">مبلغ واریز:</span>
-                        <span className="text-xs font-black text-amber-400">{AMOUNT_TOMAN} تومان</span>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-400">ایمیل متصل:</span>
+                      <span className="font-mono text-slate-300">{userState.email || "بدون ایمیل"}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs border-t border-white/5 pt-3">
+                      <span className="text-slate-400">مبلغ قابل پرداخت:</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-black text-amber-400 font-mono">{AMOUNT_TOMAN}</span>
+                        <span className="text-[10px] text-slate-300 font-bold">تومان</span>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {copied && (
-                    <div className="p-2 bg-emerald-50 border border-emerald-100 text-emerald-800 text-[10px] rounded-lg text-center font-bold">
-                      ✓ شماره کارت با موفقیت کپی شد! می‌توانید به نرم‌افزار همراه بانک خود بروید.
+                {/* Important notice */}
+                <div className="p-4 bg-amber-50/50 border border-amber-100 rounded-2xl text-[10px] text-slate-600 leading-relaxed space-y-1.5">
+                  <p className="font-black text-amber-800">💡 راهنمای تست درگاه پرداخت:</p>
+                  <p>در حال حاضر درگاه پرداخت زرین‌پال کاملاً متصل است. در صورت اجرا در محیط آزمایشی (سندباکس)، برای راحتی کار شما یک شبیه‌ساز درگاه پرداخت با قابلیت رمز پویا تدارک دیده شده است تا فرآیند ارتقا، به‌روزرسانی دیتابیس و تراکنش‌ها را به‌طور کامل و بی‌نقص تست نمایید.</p>
+                </div>
+
+                {/* Submit button */}
+                <div className="space-y-3">
+                  <button
+                    onClick={handleInitiateZarinpal}
+                    disabled={loadingPayment}
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-xs py-3.5 rounded-2xl border-b-4 border-emerald-700 active:border-b-0 active:translate-y-[4px] transition-all flex items-center justify-center gap-1.5 shadow-md"
+                  >
+                    {loadingPayment ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4" />
+                        <span>پرداخت آنلاین با درگاه زرین‌پال</span>
+                      </>
+                    )}
+                  </button>
+
+                  {paymentError && (
+                    <div className="p-3 bg-red-50 border border-red-100 text-red-700 text-[10px] rounded-xl flex items-center gap-1.5 font-bold">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{paymentError}</span>
                     </div>
                   )}
-
-                  {/* Telegram instruction box */}
-                  <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
-                    <div className="flex gap-2.5">
-                      <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-                        <Send className="w-4 h-4 text-blue-500 fill-blue-100" />
-                      </div>
-                      <div className="space-y-1">
-                        <h4 className="text-xs font-black text-slate-800">ارسال فیش در تلگرام:</h4>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">
-                          پس از واریز مبلغ {AMOUNT_TOMAN} تومان، تصویر فیش واریزی خود را به همراه آدرس ایمیل حساب خود به آیدی تلگرام مدیریت ارسال کنید:
-                        </p>
-                      </div>
-                    </div>
-
-                    <a
-                      href={`https://t.me/${TELEGRAM_ID}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full bg-blue-500 hover:bg-blue-600 text-white font-black text-xs py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/10"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>ارسال فیش به تلگرام @{TELEGRAM_ID}</span>
-                    </a>
-                  </div>
                 </div>
-
-                {/* Left side: Activate Existing Code */}
-                <div className="space-y-4 border-r border-slate-200/50 pr-0 md:pr-6">
-                  <div className="bg-amber-50/50 border border-amber-100 p-4 rounded-2xl space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-amber-500 fill-amber-100" />
-                      <h4 className="text-xs font-black text-slate-800">کد فعال‌سازی را دریافت کرده‌اید؟</h4>
-                    </div>
-                    <p className="text-[10px] text-slate-500 leading-relaxed">
-                      اگر قبلاً با واریز وجه، کد فعال‌سازی طلایی مخصوص ایمیل خود را از دکتر باقرزاده دریافت کرده‌اید، آن را در کادر زیر وارد کنید تا حساب شما فوراً فعال شود:
-                    </p>
-
-                    <div className="space-y-1.5 pt-1">
-                      <label className="text-[9px] text-slate-500 font-extrabold block">ایمیل فعال‌سازی فعلی شما:</label>
-                      <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 font-mono text-center">
-                        {userState.email ? userState.email : "⚠️ ابتدا وارد حساب کاربری خود شوید"}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <input
-                        type="text"
-                        dir="ltr"
-                        placeholder="GOLD-XXXX-XXXXX"
-                        value={activationCode}
-                        onChange={(e) => {
-                          setActivationCode(e.target.value);
-                          setActivationError("");
-                          setActivationSuccess("");
-                        }}
-                        className="w-full text-center py-2 bg-white border border-slate-200 rounded-xl font-bold font-mono text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 text-slate-800"
-                      />
-
-                      <button
-                        onClick={handleApplyCode}
-                        className="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-xs py-2.5 rounded-xl border-b-4 border-amber-700 active:border-b-0 active:translate-y-[4px] transition-all flex items-center justify-center gap-1"
-                      >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>فعال‌سازی با کد طلایی</span>
-                      </button>
-                    </div>
-
-                    {activationError && (
-                      <p className="text-[10px] text-rose-600 font-bold bg-rose-50 p-2 rounded-lg border border-rose-100 flex items-center gap-1">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        {activationError}
-                      </p>
-                    )}
-
-                    {activationSuccess && (
-                      <p className="text-[10px] text-emerald-700 font-bold bg-emerald-50 p-2 rounded-lg border border-emerald-100 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {activationSuccess}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-[10px] text-slate-500 leading-relaxed space-y-1">
-                    <p className="font-extrabold text-slate-700">💡 نحوه دریافت نام کاربری یا کد فعال‌سازی:</p>
-                    <p>پس از ارسال اسکرین‌شات فیش به یاسین باقرزاده، ایشان مشخصات اکانت طلایی پیش‌ساخته یا یک کد طلایی متصل به ایمیل شما را ارسال می‌کند.</p>
-                  </div>
-                </div>
-
               </div>
             </motion.div>
           )}
@@ -567,7 +491,9 @@ export default function PremiumPortal({ userState, onUpdateState, onClose }: Pre
                     <Receipt className="w-3.5 h-3.5" />
                     جزئیات عضویت طلایی
                   </span>
-                  <span className="text-[9px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md font-bold border border-amber-200">فعال دستی</span>
+                  <span className="text-[9px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-bold border border-emerald-200">
+                    {paymentRefId ? `کد رهگیری: ${paymentRefId}` : "درگاه آنلاین"}
+                  </span>
                 </div>
 
                 <div className="flex justify-between text-slate-600">
