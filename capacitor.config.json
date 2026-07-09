@@ -1,0 +1,16 @@
+{
+  "appId": "com.medophil.sagnazan",
+  "appName": "سگ نزن",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": [
+      "ais-dev-2ezqcl6362ip43inzzrvtt-976477654756.europe-west2.run.app",
+      "ais-pre-2ezqcl6362ip43inzzrvtt-976477654756.europe-west2.run.app",
+      "sag-nazan.firebaseapp.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

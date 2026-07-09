@@ -12,7 +12,8 @@ import PremiumPortal from "./components/PremiumPortal";
 import AuthManager from "./components/AuthManager";
 import AntigravityCanvas from "./components/AntigravityCanvas";
 import MinooChat from "./components/MinooChat";
-import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare, Compass, Users } from "lucide-react";
+import AndroidPortal from "./components/AndroidPortal";
+import { Heart, Zap, Flame, Sparkles, BookOpen, User, Settings as SettingsIcon, Award, Crown, LogOut, UserCheck, Key, LayoutDashboard, Menu, X, BookMarked, Award as AwardIcon, Bot, MessageSquare, Compass, Users, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
   // Portal visibility states
   const [showPremium, setShowPremium] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [showAndroidPortal, setShowAndroidPortal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
 
@@ -312,6 +314,21 @@ export default function App() {
                 </button>
 
                 <button
+                  onClick={() => { setShowAndroidPortal(true); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all mb-1 ${
+                    showAndroidPortal
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="w-4 h-4 text-indigo-400 animate-pulse" />
+                    <span>نسخه اندروید و وب‌اپ (PWA)</span>
+                  </div>
+                  <span className="bg-indigo-500/10 border border-indigo-500/20 text-[9px] text-indigo-300 px-1.5 py-0.5 rounded-md font-bold">APK</span>
+                </button>
+
+                <button
                   onClick={() => { setShowPremium(true); setIsSidebarOpen(false); }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-100 hover:bg-white/5 border border-transparent transition-all"
                 >
@@ -532,7 +549,11 @@ export default function App() {
           />
         )}
 
-
+        {showAndroidPortal && (
+          <AndroidPortal
+            onClose={() => setShowAndroidPortal(false)}
+          />
+        )}
       </AnimatePresence>
 
       {/* 🌌 Permanent Floating Medical AI Bubble */}

@@ -1,0 +1,22 @@
+{
+  "short_name": "سگ نزن",
+  "name": "سگ نزن | سامانه یادگیری جراحی بالینی",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/192/000000/medical-doctor.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://img.icons8.com/color/512/000000/medical-doctor.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#030712",
+  "theme_color": "#6366f1",
+  "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["education", "medical"]
+}
